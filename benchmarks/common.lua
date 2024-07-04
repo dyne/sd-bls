@@ -36,7 +36,7 @@ function sign(sk, msg)
 end
 
 A = keygen()
-sha256 = HASH.new('sha256')
+-- sha256 = HASH.new('sha256')
 
 function verify(pk, msg, sig)
 -- e(γ,H(m)) == e(G2,σ)
@@ -58,8 +58,7 @@ function test_many_issuance(num)
     table.insert(claims, {
                    c = claim,
                    s = sig,
-                   r1 = G1 * rev,
-                   r2 = G2 * rev
+                   r2 = (G2 * rev):to_zcash()
     })
     table.insert(revocs, { claim, rev })
   end
@@ -72,17 +71,11 @@ function test_many_proofs(num, creds)
   local c = 0
   for k,v in ipairs(creds) do
     local sig = v.s -- naked issuer's sig
-    local revG1 = v.r1
     local revG2 = v.r2
-    local er = BIG.random()
-    local tri = BIG.new(sha256:process(
-                          (Miller(A.pk, revG1) ^ er):octet()
-    ))
     table.insert(proofs, {
                    id = v.c,
-                   s = sig + sign(tri, v.c),
-                   p = (revG2 + G2*tri):to_zcash(),
-                   r = G1*er
+                   s = v.s,
+                   r = v.r2
     })
     c = c + 1
     if c == num then break end
@@ -95,8 +88,8 @@ function test_many_verifs(num, proofs)
   local c = 0
   for k,v in ipairs(proofs) do
     local sig = v.s
-    local pk = ECP2.from_zcash(v.p)
-    assert( verify(pk + A.pk, v.id, sig) )
+    local pk = ECP2.from_zcash(v.r)
+    assert( verify(pk + A.pk, v.id, v.s) )
     c = c + 1
     if c == num then break end
   end
@@ -109,19 +102,8 @@ function revocation_contains(revocations, proof)
   for k,v in ipairs(revocations) do
     if v[1] == proof.id then
       local rev = v[2]
-      local tri =
-        BIG.new(
-          sha256:process(
-            (Miller(A.pk,proof.r)^rev)
-            :octet()
-        ))
       if -- addendum of proof.p is equal to revG2
-        ECP2.from_zcash(proof.p) - (G2*tri) == G2*rev
-        and -- verify unblinded issuer signature
-        verify(A.pk, proof.id,
-               proof.s
-               - sign(tri, proof.id)
-               - sign(rev, proof.id))
+        proof.r == (G2*rev):to_zcash()
       then
         res = 1
       end
@@ -135,10 +117,9 @@ function test_many_revocs(num, revocs, proofs)
   local c = 0
   local found = 0
   for k,v in ipairs(proofs) do
-    local sig = v.s
-    local pk = ECP2.from_zcash(v.p)
+    local pk = ECP2.from_zcash(v.r)
+    assert( verify(pk + A.pk, v.id, v.s) )
     found = revocation_contains(revocs, v)
-    assert( verify(pk + A.pk, v.id, sig) )
     c = c + 1
     if c == num then break end
   end

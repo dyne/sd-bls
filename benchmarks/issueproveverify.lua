@@ -17,8 +17,8 @@
 
 --A = keygen()
 --sha256 = HASH.new('sha256')
-TOTAL = 100
-STEP = 5
+TOTAL = 160
+STEP = 10
 
 -- some functions are in common.lua
 
@@ -33,19 +33,19 @@ end
 collectgarbage'collect'
 collectgarbage'collect'
 
-printerr '\n'
-printerr 'proof '
+-- printerr '\n'
+-- printerr 'proof '
 local PROOF_T = { }
 for i=10,TOTAL,STEP do
-  printerr(i.." ")
+  -- printerr(i.." ")
   PROOFS, T = test_many_proofs(i, CLAIMS)
   table.insert(PROOF_T, T)
 end
-collectgarbage'collect'
-collectgarbage'collect'
+-- collectgarbage'collect'
+-- collectgarbage'collect'
 
-printerr''
-printerr "verification "
+printerr '\n'
+printerr 'verification '
 local VERIF_T = { }
 for i=10,TOTAL,STEP do
   printerr(i.." ")
@@ -55,13 +55,13 @@ end
 collectgarbage'collect'
 collectgarbage'collect'
 
-print("CLAIMS \t ISSUE \t PROVE \t VERIFY")
+print("CLAIMS \t ISSUE \t VERIFY")
 for i=1,(TOTAL/STEP),1 do
   write(i*STEP)
   write(' \t ')
   write(ISSUANCE_T[i])
-  write(' \t ')
-  write(PROOF_T[i])
+  -- write(' \t ')
+  -- write(PROOF_T[i])
   write(' \t ')
   write(VERIF_T[i])
   write('\n')

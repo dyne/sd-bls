@@ -1,7 +1,7 @@
 
-STATS := issueproveverify.txt verifyrevocations.txt
+STATS := issueproveverify.txt verifyrevocations.txt pvss.txt
 
-all: issueproveverify.eps verifyrevocations.eps hamming.eps
+all: issueproveverify.eps verifyrevocations.eps pvss.eps
 
 # issueproveverify: ${STATS}
 # 	 sed 's/OUT/$@.txt/; s/TERM/pngcairo dashed ${TERMOPTS}/' \

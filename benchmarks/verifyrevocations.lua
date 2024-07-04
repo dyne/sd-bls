@@ -17,8 +17,8 @@
 
 -- A = keygen()
 -- sha256 = HASH.new('sha256')
-TOTAL = 105
-STEP = 5
+TOTAL = 160
+STEP = 10
 N_PROOFS = 1
 
 CLAIMS, REVOC, T = test_many_issuance(N_PROOFS)
