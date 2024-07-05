@@ -467,24 +467,39 @@ revealing their content.
 
 \section{Prevent reply attack on presentation}
 {\color{blue}
-	Con lo schema base presentato fino a qui un Verifier only gets the proof that the
-	credential was issued by a particular Issuer and not already verified, but the credential
+	With the scheme presented so far a Verifier only gets the proof that the
+	credential was issued by a particular Issuer and was not already revoked, but the credential
 	itself can be replayed by anyone who gets access to it.  This means
 	that, for example, after a credential was presented to an evil verifier or leacked to an attacker, the	attacker can present the credential to any other verifier.
-	Per impedire questo tipo di presentazione non autorizzata si puo aggiungere altri 3 campi contenenti, informazioni sulla sessione, la loro firma e la chiave pubblica associata, abbiamo quindi:
-	$$\{H,rPk,s',m,t,tSg,tPk\}$$
-	Dove $t$ contiene l'intended verifier e il momento della scadenza (es: 1 minuto dopo l'emissione).\\
-	Dove $s'=s+sign(tSk,H)$.\\
+	To prevent this type of unauthorized presentation, you can add 3 more fields containing information about the session, their signature and the associated public key.//
 	
-	Si vede subito come tPk, connn tutto il blocco $t,tSg,tpk$, non possa essere rimosso perché necessario alla verifica di $s'$
-	Si vede subito come t non possano essere sostituito e rifirmato creando una nuova tSg perché il verifier non conosce $tSk$
-	Si vede subito come dalla settupla non si puo generare un altra sestupla perché sarebbe necessario conoscere $s$, ma chi riceve le credenziali conosce vede solo $s'$. In più non è possibile ricreare $s$ conoscendo $H$ perché non si conosce $rSk$ né $aSk$ per performare le firme.
+	\textbf{Issuer emit}: $\{H,r,s\}$
+	
+	\textbf{Holder} can chose a secret key tSk each time and \textbf{present}:
+	$$\{H,r,s',m,t,tSg,tPk\}$$
+	Where $s'=s+sign(tSk,H:r)$.\\
+	Where $t$ can contain expiration date-time and the intended verifier.\\
+	
+	\textbf{Verifier checks}:
+	\begin{itemize}
+		\item t, time and session informations
+		\item t signature
+		\item signature s' with the publick key: $rPk,aPk,tPk$
+		\item revocation status of $s'$
+	\end{itemize}	
+	
+	\textbf{Security considerations}. The schema is secure because a evil verifier cannot recostruct the holder information $\{H,r,s\}$ necessary for reply attack. Furthermore the 3 attributes of presented credentials $t,tSg,tpk$ cannot be modified or removed because $tPk$ is necessary for $s'$ signature verification.
 }
-{\color{red}
-	[per noi e basta] La soluzione fatta come così sopra dovrebbe mantenere un vantaggio a sd-jwt che questo schema già ha e che forse non abbiamo detto: non avendo un header fisso con dentro una chiave pubblica per fare questa cosa allora la presentazione di m diversi non è linkabile alla stessa chiave pubblica o, se in jwt non usi il binding con la chiave, allo stesso gruppo di informazioni
-	La mia proposta di soluzione al replay attack riesce a mantenere questa proprietà di sd-bls ed è quindi migliore dell'alternativa (uguale a come fa jwt):
-	$$H(m:rPk:holderPk),rPk,s,m,t,tSg,holderPk$$
-}
+%{\color{red}
+%	[per noi e basta]
+%	Si vede subito come tPk, connn tutto il blocco $t,tSg,tpk$, non possa essere rimosso perché necessario alla verifica di $s'$
+%	Si vede subito come t non possano essere sostituito e rifirmato creando una nuova tSg perché il verifier non conosce $tSk$
+%	Si vede subito come dalla settupla non si puo generare un altra sestupla perché sarebbe necessario conoscere $s$, ma chi riceve le credenziali conosce vede solo $s'$. In più non è possibile ricreare $s$ conoscendo $H$ perché non si conosce $rSk$ né $aSk$ per performare le firme.
+	
+%	La soluzione fatta come così sopra dovrebbe mantenere un vantaggio a sd-jwt che questo schema già ha e che forse non abbiamo detto: non avendo un header fisso con dentro una chiave pubblica per fare questa cosa allora la presentazione di m diversi non è linkabile alla stessa chiave pubblica o, se in jwt non usi il binding con la chiave, allo stesso gruppo di informazioni
+%	La mia proposta di soluzione al replay attack riesce a mantenere questa proprietà di sd-bls ed è quindi migliore dell'alternativa (uguale a come fa jwt):
+%	$$H(m:rPk:holderPk),rPk,s,m,t,tSg,holderPk$$
+%}
 
 
 \section{Benchmarks}

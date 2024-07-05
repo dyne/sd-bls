@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2024.3.14)  5 JUL 2024 02:07
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2024.3.14)  5 JUL 2024 15:17
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -970,45 +970,49 @@ Underfull \hbox (badness 10000) in paragraph at lines 483--485
  []
 
 [4]
-Underfull \hbox (badness 10000) in paragraph at lines 572--575
+Underfull \hbox (badness 2310) in paragraph at lines 576--579
+\T1/LinuxLibertineT-TLF/m/n/10 (+20) Where $\LS1/libertinust1math/m/it/10 t$ \T
+1/LinuxLibertineT-TLF/m/n/10 (+20) can con-tain ex-pi-ra-tion date-time and the
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 576--579
 
  []
 
 LaTeX Font Info:    Font shape `T1/LinuxLibertineT-TLF/m/n' will be
-(Font)              scaled to size 9.0pt on input line 591.
+(Font)              scaled to size 9.0pt on input line 606.
 LaTeX Font Info:    Font shape `LS1/libertinust1math/m/n' will be
-(Font)              scaled to size 9.0pt on input line 591.
+(Font)              scaled to size 9.0pt on input line 606.
 LaTeX Font Info:    Font shape `LS1/libertinust1math/m/n' will be
-(Font)              scaled to size 6.0pt on input line 591.
+(Font)              scaled to size 6.0pt on input line 606.
 LaTeX Font Info:    Font shape `LS1/libertinust1math/m/it' will be
-(Font)              scaled to size 9.0pt on input line 591.
+(Font)              scaled to size 9.0pt on input line 606.
 LaTeX Font Info:    Font shape `LS1/libertinust1math/m/it' will be
-(Font)              scaled to size 6.0pt on input line 591.
+(Font)              scaled to size 6.0pt on input line 606.
 LaTeX Font Info:    Font shape `LS2/libertinust1mathsym/m/n' will be
-(Font)              scaled to size 9.0pt on input line 591.
+(Font)              scaled to size 9.0pt on input line 606.
 LaTeX Font Info:    Font shape `LS2/libertinust1mathsym/m/n' will be
-(Font)              scaled to size 6.0pt on input line 591.
+(Font)              scaled to size 6.0pt on input line 606.
 LaTeX Font Info:    Font shape `LS2/libertinust1mathex/m/n' will be
-(Font)              scaled to size 9.0pt on input line 591.
+(Font)              scaled to size 9.0pt on input line 606.
 LaTeX Font Info:    Font shape `LS2/libertinust1mathex/m/n' will be
-(Font)              scaled to size 6.0pt on input line 591.
+(Font)              scaled to size 6.0pt on input line 606.
 LaTeX Font Info:    Font shape `LS1/libertinust1mathbb/m/n' will be
-(Font)              scaled to size 9.0pt on input line 591.
+(Font)              scaled to size 9.0pt on input line 606.
 LaTeX Font Info:    Font shape `LS1/libertinust1mathbb/m/n' will be
-(Font)              scaled to size 6.0pt on input line 591.
+(Font)              scaled to size 6.0pt on input line 606.
 LaTeX Font Info:    Font shape `LS1/libertinust1math/b/n' will be
-(Font)              scaled to size 9.0pt on input line 591.
+(Font)              scaled to size 9.0pt on input line 606.
 LaTeX Font Info:    Font shape `LS1/libertinust1math/b/n' will be
-(Font)              scaled to size 6.0pt on input line 591.
+(Font)              scaled to size 6.0pt on input line 606.
 LaTeX Font Info:    Font shape `LS1/libertinust1math/b/it' will be
-(Font)              scaled to size 9.0pt on input line 591.
+(Font)              scaled to size 9.0pt on input line 606.
 LaTeX Font Info:    Font shape `LS1/libertinust1math/b/it' will be
-(Font)              scaled to size 6.0pt on input line 591.
+(Font)              scaled to size 6.0pt on input line 606.
 LaTeX Font Info:    Font shape `T1/LinuxLibertineT-TLF/m/n' will be
-(Font)              scaled to size 6.0pt on input line 591.
-
-Underfull \vbox (badness 1024) has occurred while \output is active []
-
+(Font)              scaled to size 6.0pt on input line 606.
 Package epstopdf Info: Source file: <issueproveverify.eps>
 (epstopdf)                    date: 2024-07-05 01:01:02
 (epstopdf)                    size: 25240 bytes
@@ -1017,13 +1021,13 @@ Package epstopdf Info: Source file: <issueproveverify.eps>
 (epstopdf)                    size: 10737 bytes
 (epstopdf)             Command: <repstopdf --outfile=issueproveverify-eps-conve
 rted-to.pdf issueproveverify.eps>
-(epstopdf)             \includegraphics on input line 605.
+(epstopdf)             \includegraphics on input line 620.
 Package epstopdf Info: Output file is already uptodate.
 <issueproveverify-eps-converted-to.pdf, id=155, 361.35pt x 216.81pt>
 File: issueproveverify-eps-converted-to.pdf Graphic file (type pdf)
 <use issueproveverify-eps-converted-to.pdf>
 Package pdftex.def Info: issueproveverify-eps-converted-to.pdf  used on input l
-ine 605.
+ine 620.
 (pdftex.def)             Requested size: 229.87749pt x 137.92755pt.
 Package epstopdf Info: Source file: <verifyrevocations.eps>
 (epstopdf)                    date: 2024-07-05 01:01:02
@@ -1033,13 +1037,13 @@ Package epstopdf Info: Source file: <verifyrevocations.eps>
 (epstopdf)                    size: 10109 bytes
 (epstopdf)             Command: <repstopdf --outfile=verifyrevocations-eps-conv
 erted-to.pdf verifyrevocations.eps>
-(epstopdf)             \includegraphics on input line 623.
+(epstopdf)             \includegraphics on input line 638.
 Package epstopdf Info: Output file is already uptodate.
 <verifyrevocations-eps-converted-to.pdf, id=157, 361.35pt x 216.81pt>
 File: verifyrevocations-eps-converted-to.pdf Graphic file (type pdf)
 <use verifyrevocations-eps-converted-to.pdf>
 Package pdftex.def Info: verifyrevocations-eps-converted-to.pdf  used on input 
-line 623.
+line 638.
 (pdftex.def)             Requested size: 229.87749pt x 137.92755pt.
 Package epstopdf Info: Source file: <pvss.eps>
 (epstopdf)                    date: 2024-07-05 01:01:02
@@ -1049,13 +1053,16 @@ Package epstopdf Info: Source file: <pvss.eps>
 (epstopdf)                    size: 10519 bytes
 (epstopdf)             Command: <repstopdf --outfile=pvss-eps-converted-to.pdf 
 pvss.eps>
-(epstopdf)             \includegraphics on input line 633.
+(epstopdf)             \includegraphics on input line 648.
 Package epstopdf Info: Output file is already uptodate.
 <pvss-eps-converted-to.pdf, id=158, 361.35pt x 216.81pt>
 File: pvss-eps-converted-to.pdf Graphic file (type pdf)
 <use pvss-eps-converted-to.pdf>
-Package pdftex.def Info: pvss-eps-converted-to.pdf  used on input line 633.
+Package pdftex.def Info: pvss-eps-converted-to.pdf  used on input line 648.
 (pdftex.def)             Requested size: 229.87749pt x 137.92755pt.
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
  [5 <./issueproveverify-eps-converted-to.pdf>] [6 <./verifyrevocations-eps-conv
 erted-to.pdf> <./pvss-eps-converted-to.pdf>] (./sd-bls.bbl
 Underfull \hbox (badness 5490) in paragraph at lines 46--51
@@ -1087,11 +1094,11 @@ Package rerunfilecheck Info: File `sd-bls.out' has not changed.
 (rerunfilecheck)             Checksum: 729A16DF410D1FADBF38556833C7F0E9;2696.
  ) 
 Here is how much of TeX's memory you used:
- 18604 strings out of 478287
- 307199 string characters out of 5849289
+ 18607 strings out of 478287
+ 307277 string characters out of 5849289
  620040 words of memory out of 5000000
  36135 multiletter control sequences out of 15000+600000
- 588355 words of font info for 287 fonts, out of 8000000 for 9000
+ 588620 words of font info for 289 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  70i,15n,117p,999b,498s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/libertinust1math/libusEX.enc}{
@@ -1114,7 +1121,7 @@ libertine/LinLibertineTB.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
 libertine/LinLibertineTBI.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
 /libertine/LinLibertineTI.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
 /stix/stix-mathcal.pfb>
-Output written on sd-bls.pdf (8 pages, 579231 bytes).
+Output written on sd-bls.pdf (8 pages, 577604 bytes).
 PDF statistics:
  311 PDF objects out of 1000 (max. 8388607)
  268 compressed objects within 3 object streams
