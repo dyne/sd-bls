@@ -465,6 +465,28 @@ useful when revocation issuers will reconstruct a revocation, since
 they can refer to them to prove their shares are authentic without
 revealing their content.
 
+\section{Prevent reply attack on presentation}
+{\color{blue}
+	Con lo schema base presentato fino a qui un Verifier only gets the proof that the
+	credential was issued by a particular Issuer and not already verified, but the credential
+	itself can be replayed by anyone who gets access to it.  This means
+	that, for example, after a credential was presented to an evil verifier or leacked to an attacker, the	attacker can present the credential to any other verifier.
+	Per impedire questo tipo di presentazione non autorizzata si puo aggiungere altri 3 campi contenenti, informazioni sulla sessione, la loro firma e la chiave pubblica associata, abbiamo quindi:
+	$$\{H,rPk,s',m,t,tSg,tPk\}$$
+	Dove $t$ contiene l'intended verifier e il momento della scadenza (es: 1 minuto dopo l'emissione).\\
+	Dove $s'=s+sign(tSk,H)$.\\
+	
+	Si vede subito come tPk, connn tutto il blocco $t,tSg,tpk$, non possa essere rimosso perché necessario alla verifica di $s'$
+	Si vede subito come t non possano essere sostituito e rifirmato creando una nuova tSg perché il verifier non conosce $tSk$
+	Si vede subito come dalla settupla non si puo generare un altra sestupla perché sarebbe necessario conoscere $s$, ma chi riceve le credenziali conosce vede solo $s'$. In più non è possibile ricreare $s$ conoscendo $H$ perché non si conosce $rSk$ né $aSk$ per performare le firme.
+}
+{\color{red}
+	[per noi e basta] La soluzione fatta come così sopra dovrebbe mantenere un vantaggio a sd-jwt che questo schema già ha e che forse non abbiamo detto: non avendo un header fisso con dentro una chiave pubblica per fare questa cosa allora la presentazione di m diversi non è linkabile alla stessa chiave pubblica o, se in jwt non usi il binding con la chiave, allo stesso gruppo di informazioni
+	La mia proposta di soluzione al replay attack riesce a mantenere questa proprietà di sd-bls ed è quindi migliore dell'alternativa (uguale a come fa jwt):
+	$$H(m:rPk:holderPk),rPk,s,m,t,tSg,holderPk$$
+}
+
+
 \section{Benchmarks}
 
 We implemented the flows for credential issuance, presentation,
