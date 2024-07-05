@@ -24,6 +24,67 @@ function verify(pk, msg, sig)
     Miller(G2, sig)
    )
 end
+
+function issuer_sign(claims)
+  local signed = { }
+  local revs= { }
+  for k,v in pairs(CLAIMS) do
+    local rev = BIG.random()
+    local m = k..'='..v
+    local rPK = (G2 * rev):to_zcash()
+    local h = sha256(m..rPK)
+    local sig = sign(A.sk, h) + sign(rev, h)
+    signed[m] = { H = h, s = sig, r = rPK }
+    revs['HolderID/'..m] = rev
+  end
+  return signed, revs
+end
+
+function issuer_revoke(revocations, torevoke)
+  local revs = { }
+  for _,v in pairs(torevoke) do
+    -- revokers will keep a database of HolderIDs with revocations; the
+    -- privacy of such databases can be enhanced by not holding values
+    -- in such a database.
+    local m = strtok(v,'/')[2]
+    local r = (G2*revocations[v]):to_zcash()
+    local h = sha256(m..r)
+    -- I.warn(r)
+    revs[h] = revocations[v]
+  end
+  return revs
+end
+
+function holder_prove(signed_claims, disclosures)
+  local res = { }
+  for m,v in pairs(signed_claims) do
+    local claim = strtok(m, '=')
+    if array_contains(disclosures, claim[1]) then
+      -- I.warn(v)
+      table.insert(res, {
+                     m = m,
+                     H = v.H,
+                     s = v.s,
+                     r = v.r
+      })
+    end
+  end
+  return res
+end
+
+function revocation_contains(revocations, proof)
+  local res   = false -- store here result for constant time operations
+  -- I.warn(revocations)
+  local h = proof.H
+  -- TODO: for some reason revocations[proof.H] doesn't works
+  for k,v in pairs(revocations) do
+    if k==proof.H and proof.r == (G2*v):to_zcash() then
+      res = true
+    end
+  end
+  return res
+end
+
 -- Issuer's keyring hardcoded 0x0 seed
 A = {sk = BIG.new(sha256(OCTET.zero(32)))}
 A.pk = G2*A.sk
@@ -38,80 +99,27 @@ CLAIMS = {
   nationality = "italian"
 }
 
--- Issuer signs claims
-SIGNED_CLAIMS = { }
-REVOCATIONS = { }
-for k,v in pairs(CLAIMS) do
-   local rev = BIG.random()
-   local id = k..'='..v
-   local sig = sign(A.sk, id) + sign(rev, id)
-   SIGNED_CLAIMS[id] = { sig, G2 * rev }
-   REVOCATIONS['HolderID/'..id] = rev
-end
-sha256 = HASH.new('sha256')
+SIGNED_CLAIMS, REVOCATIONS = issuer_sign(CLAIMS)
 
-function holder_prove(signed_claims, disclosures)
-  local res = { }
-  local tri
-  for m,v in pairs(signed_claims) do
-    local sig = v[1] -- naked issuer's sig
-    local revG2 = v[2]
-    local claim = strtok(m, '=')
-    -- assert(tri == BIG.new(sha256:process(
-    --                        (PAIR.ate(A.pk, G1*er)^rev):octet()
-    -- )))
-    if array_contains(disclosures, claim[1]) then
-      table.insert(res, {
-                     id = m,
-                     s = sig,
-                     r = revG2:to_zcash()
-      })
-    end
-  end
-  return res
-end
-
-function revocation_contains(revocations, claim)
-  local res   = false -- store here result for constant time operations
-  local rev = revocations[claim.id]
-  if rev then
-    if claim.r == (G2*rev):to_zcash() then
-      res = true
-    end
-  end
-  return res
-end
-
--- disclose = { 'name', 'gender', 'above_18' }
-local torevoke = {
+local TOREVOKE = {
   'HolderID/born_in=Napoli',
   'HolderID/gender=male',
   'HolderID/nationality=italian'}
-local revocations = {}
-for _,v in pairs(torevoke) do
-  local k = strtok(v,'/')[2]
-  revocations[k] = REVOCATIONS[v]
-end
+
+REVOKED = issuer_revoke(REVOCATIONS, TOREVOKE)
 
 DISCLOSE = { 'name', 'gender', 'above_18' }
+
 CREDENTIAL_PROOF = holder_prove(SIGNED_CLAIMS, DISCLOSE)
--- show encoded claims example
-print(JSON.encode({
-          credential_proof = CREDENTIAL_PROOF,
-          verifier = 'IssuerID',
-          revocations = revocations
-}))
-I.schema({proof=CREDENTIAL_PROOF,
-          rev=revocations})
--- relying party verifies credentials
--- downloads PK of IssuerID from DID
+
 for _,proof in pairs(CREDENTIAL_PROOF) do
-  assert( verify(ECP2.from_zcash(proof.r) + A.pk,
-                 proof.id, proof.s) )
-  if proof.id == 'gender=male' then
-    assert(revocation_contains(revocations, proof), "Not revoked: "..proof.id)
+  local H = sha256(proof.m..proof.r)
+  assert(H == proof.H, "Invalid proof hash")
+  assert( verify(ECP2.from_zcash(proof.r) + A.pk, H, proof.s) )
+  if proof.m == 'gender=male' then
+    assert(revocation_contains(REVOKED, proof), "Not revoked: "..proof.m)
   else
-    assert(not revocation_contains(revocations, proof), "Revoked: "..proof.id)
+    assert(not revocation_contains(REVOKED, proof), "Revoked: "..proof.m)
   end
 end
 
@@ -120,10 +128,10 @@ for _,proof in pairs(CREDENTIAL_PROOF) do
   proof.s = ECP.random() -- FUZZ
   assert( not verify(ECP2.from_zcash(proof.r) + A.pk,
                      proof.id, proof.s) )
-  if proof.id == 'gender=male' then
-    assert(revocation_contains(revocations, proof), "Not revoked: "..proof.id)
+  if proof.m == 'gender=male' then
+    assert(revocation_contains(REVOKED, proof), "Not revoked: "..proof.m)
   else
-    assert(not revocation_contains(revocations, proof), "Revoked: "..proof.id)
+    assert(not revocation_contains(REVOKED, proof), "Revoked: "..proof.m)
   end
 end
 
@@ -131,17 +139,13 @@ warn('random proof.r')
 for _,proof in pairs(CREDENTIAL_PROOF) do
   proof.r = ECP2.random():to_zcash() -- FUZZ
   assert( not verify(ECP2.from_zcash(proof.r) + A.pk,
-                     proof.id, proof.s) )
-  assert(not revocation_contains(revocations, proof), "Revoked: "..proof.id)
+                     proof.m, proof.s) )
+  assert(not revocation_contains(REVOKED, proof), "Revoked: "..proof.m)
 end
 
 warn('random A.pk')
 for _,proof in pairs(CREDENTIAL_PROOF) do
   assert( not verify(ECP2.from_zcash(proof.r) + ECP2.random(),
-                     proof.id, proof.s) )
-  -- if proof.id == 'gender=male' then
-  --   assert(revocation_contains(revocations, proof), "Not revoked: "..proof.id)
-  -- else
-    assert(not revocation_contains(revocations, proof), "Revoked: "..proof.id)
-    -- end
+                     proof.m, proof.s) )
+  assert(not revocation_contains(REVOKED, proof), "Revoked: "..proof.m)
 end
