@@ -29,13 +29,14 @@ function issuer_sign(claims)
   local signed = { }
   local revs= { }
   for k,v in pairs(CLAIMS) do
-    local rev = BIG.random()
+    local rSK = BIG.random()
     local m = k..'='..v
-    local rPK = (G2 * rev):to_zcash()
-    local h = sha256(m..rPK)
-    local sig = sign(A.sk, h) + sign(rev, h)
-    signed[m] = { H = h, s = sig, r = rPK }
-    revs['HolderID/'..m] = rev
+    local o = { }
+    o.r = (G2 * rSK):to_zcash()
+    o.H = sha256(m..o.r)
+    o.s = sign(A.sk, o.H..o.r) + sign(rSK, o.H..o.r)
+    signed[m] = o
+    revs['HolderID/'..m] = rSK
   end
   return signed, revs
 end
@@ -70,6 +71,10 @@ function holder_prove(signed_claims, disclosures)
     end
   end
   return res
+end
+
+function verify_proof(APK, proof)
+  return verify(ECP2.from_zcash(proof.r) + APK, proof.H..proof.r, proof.s)
 end
 
 function revocation_contains(revocations, proof)
@@ -115,7 +120,7 @@ CREDENTIAL_PROOF = holder_prove(SIGNED_CLAIMS, DISCLOSE)
 for _,proof in pairs(CREDENTIAL_PROOF) do
   local H = sha256(proof.m..proof.r)
   assert(H == proof.H, "Invalid proof hash")
-  assert( verify(ECP2.from_zcash(proof.r) + A.pk, H, proof.s) )
+  assert( verify_proof(A.pk, proof) )
   if proof.m == 'gender=male' then
     assert(revocation_contains(REVOKED, proof), "Not revoked: "..proof.m)
   else
@@ -126,8 +131,7 @@ end
 warn('random proof.s')
 for _,proof in pairs(CREDENTIAL_PROOF) do
   proof.s = ECP.random() -- FUZZ
-  assert( not verify(ECP2.from_zcash(proof.r) + A.pk,
-                     proof.id, proof.s) )
+  assert( not verify_proof(A.pk, proof) )
   if proof.m == 'gender=male' then
     assert(revocation_contains(REVOKED, proof), "Not revoked: "..proof.m)
   else
@@ -138,14 +142,12 @@ end
 warn('random proof.r')
 for _,proof in pairs(CREDENTIAL_PROOF) do
   proof.r = ECP2.random():to_zcash() -- FUZZ
-  assert( not verify(ECP2.from_zcash(proof.r) + A.pk,
-                     proof.m, proof.s) )
+  assert(not verify_proof(A.pk, proof) )
   assert(not revocation_contains(REVOKED, proof), "Revoked: "..proof.m)
 end
 
 warn('random A.pk')
 for _,proof in pairs(CREDENTIAL_PROOF) do
-  assert( not verify(ECP2.from_zcash(proof.r) + ECP2.random(),
-                     proof.m, proof.s) )
+  assert(not verify_proof(A.pk, proof) )
   assert(not revocation_contains(REVOKED, proof), "Revoked: "..proof.m)
 end
