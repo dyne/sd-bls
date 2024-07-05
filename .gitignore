@@ -1,2 +1,7 @@
 sd-bls.tex
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
 *.pdf
