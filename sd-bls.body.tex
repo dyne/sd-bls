@@ -319,18 +319,21 @@ Since $\sigma_i\in G_1 \forall i$, the algorithm has an homomorphic
 property. We exploit this property to add a revocation signature into
 the signed credential.
 
-We create a new secret key $rev$ with public key $r$ and signature of
-the claim $\sigma_{rev}$ to add to the issuer signature:
+The issuer create a credential as follow: given a claim $m$, it generate a new secret key $rev$ with public key $r$. Let $\mathcal{H}$ be a cryptographic hash function, we compute:
+\begin{equation*}
+    H = \mathcal{H}(m : r)
+\end{equation*}
+then the issuer proceeds to sign with both its private key, and the revocation key generated above:
 \begin{equation*}\label{rev_agg}
     \begin{split}
         r &= rev \cdot G_2 \\
-        \sigma_{rev} &= rev \cdot U\\
-        \sigma &= sk\cdot U + \sigma_{rev}\\
+        \sigma_{rev} &= sign(rev, H : r)\\
+        \sigma &= sign(sk, H : r) + \sigma_{rev}\\
    \end{split}
 \end{equation*}
 The set of all the signed claims will be:
 \begin{equation*}
-   \mathcal{C} = \big\{ \{id, r, \sigma \} : id\in claims  \big\}
+   \mathcal{C} = \big\{ \{H, r, \sigma, m \} : m\in claims  \big\}
 \end{equation*}
 
 At the end of this phase the holder is sent the \textit{signed claims}
@@ -343,21 +346,40 @@ later to issue revocations.
 
 \subsection{Presentation} \label{presentation}
 
-When the holder needs to disclose a particular claim $id$ it is
-sufficient to send the signed claim set $\{id, r, \sigma \}$.
+An holder that needs to present a credential can choose the set of claims that need to present, and selectively disclose the desired claims.\\
+This can be achieved by simply presenting the set $\{ H, r, \sigma \}$ for each attribute requested, and the complete set  $\{ H, r, \sigma, m \}$ for the ones that must be disclosed.\\
+On the other hand this method clearly suffer vulnerability against replay attacks: if a malicious third party intercept a presentation, it can use it to impersonate the holder in another session.
+To prevent this type of unauthorized presentation, you can add more fields containing information about the session, their signature and the associated public key.\\
+We will refer to this as\\
+\textbf{Extended form of the credential} \\
+For each presentation the holder generate a key pair $(sk_t, pk_t)$ and a string $t$ containing all the desired session informations, such as expiration date or the indended verifier.\\
+Then we compute
+\begin{equation*}
+    \begin{split}
+        \sigma' &= \sigma + sign(sk_t, H : r) \\
+        \sigma_{t} &= sign(sk_t, H : r : s' : t : pk_t)
+    \end{split}
+\end{equation*}
+In the end the presented credential is of the form
+\begin{equation*}
+    \{H, r, \sigma', t, pk_t,  \sigma_t,\}
+\end{equation*}
+The schema is secure because a evil verifier cannot recostruct the holder information $\{H,r,s\}$ necessary for reply attack. Furthermore the 3 attributes of presented credentials $t,\sigma_t, pk_t$ cannot be modified or removed because $pk_t$ is necessary for $\sigma'$ signature verification, as will be discussed in the next section.
 
 \subsection{Verification}
 
 Credential verification is made by checking the presented issuer's
-signature. In order to do that the credential issuer's public key must
-be added to the revocation public key.\\ As explained in section
-\ref{presentation} we can consider the credential proof as a
+signature and revocation status of each claim. In order to verify the signature the credential issuer's public key must
+be added to the revocation public key.\\
+\textbf{Basic form}
+We consider the credential proof as a
 collection of tables of the following form:
 \begin{equation*}
-    c_{id} = \{id, r, \sigma \}
+    c = \{H, r, \sigma \}
 \end{equation*}
 where $\sigma$ and $r$ are respectively the signature of the string
-$id$ and the revocation public key.  We can check the validity of the
+$H$ and the revocation public key, optionally the claim value $m$ can be included.\\
+We can check the validity of the
 presented claim computing the key
 \begin{equation*}
     pk = A.pk + r
@@ -369,11 +391,11 @@ and verify the bls signature $\sigma$.
 The signature $\sigma$ is given by
 \begin{equation*}
 \begin{split}
-    \sigma &= sign(A.sk, id) + sign(rev, id) \\
+    \sigma &= sign(A.sk, H) + sign(rev, H) \\
      &= A.sk U + rev U
 \end{split}
 \end{equation*}
-where $U$ is the mapping of the string $id$ in the group $G_1$.\\
+where $U$ is the mapping of the string $H$ in the group $G_1$.\\
 Recalling the verification formula, it holds that:
 \begin{equation*}
 \begin{split}
@@ -385,6 +407,28 @@ Recalling the verification formula, it holds that:
 \end{split}
 \end{equation*}
 where each equality holds for the bilinearity of the Miller loop.\\
+When the presentation contains the value $m$ it should also be checked that
+\begin{equation*}
+    H = \mathcal{H}(m : r).
+\end{equation*}
+\textbf{Extended form} If the verifier receives the credential as $\{H, r, \sigma', t, pk_t,  \sigma_t,\}$ then it proceeds to
+\begin{itemize}
+\item verifiy the information in $t$ (e.g. timestamp)
+\item verify $\sigma_t$ with public key $pk_t$
+\item verify $\sigma'$ with the public key $A.pk + r + pk_t$
+	\end{itemize}
+
+ \textbf{security consideration ?}
+ %{\color{red}
+%	[per noi e basta]
+%	Si vede subito come tPk, connn tutto il blocco $t,tSg,tpk$, non possa essere rimosso perché necessario alla verifica di $s'$
+%	Si vede subito come t non possano essere sostituito e rifirmato creando una nuova tSg perché il verifier non conosce $tSk$
+%	Si vede subito come dalla settupla non si puo generare un altra sestupla perché sarebbe necessario conoscere $s$, ma chi riceve le credenziali conosce vede solo $s'$. In più non è possibile ricreare $s$ conoscendo $H$ perché non si conosce $rSk$ né $aSk$ per performare le firme.
+
+%	La soluzione fatta come così sopra dovrebbe mantenere un vantaggio a sd-jwt che questo schema già ha e che forse non abbiamo detto: non avendo un header fisso con dentro una chiave pubblica per fare questa cosa allora la presentazione di m diversi non è linkabile alla stessa chiave pubblica o, se in jwt non usi il binding con la chiave, allo stesso gruppo di informazioni
+%	La mia proposta di soluzione al replay attack riesce a mantenere questa proprietà di sd-bls ed è quindi migliore dell'alternativa (uguale a come fa jwt):
+%	$$H(m:rPk:holderPk),rPk,s,m,t,tSg,holderPk$$
+%}
 
 This concludes the first verification phase. If the given presentation
 is valid, then the verifier should proceed to check the revocation
@@ -397,7 +441,7 @@ verified, we update the revocation list from the issuer. A revocation
 list can be publicly distributed since revocation keys do not provide
 any information on the identity of holders.
 
-Given an element $c_{id} = \{id, r, \sigma \}$ of the credential
+Given an element $c = \{H, r, \sigma \}$ of the credential
 presentation and the Issuer public key $A.pk$, if the claim id is
 present in the revocation list, we can take the corresponding
 revocation private key $rev$.\\ We can verify the validity of the
@@ -416,6 +460,8 @@ invalid.
 If it happens that the signature verification is successful and that
 the revocation key does not match, one can conclude that the
 credential is not revoked.
+
+Note that in the case the verifier received a credential in extended form the check for the revocation status does not change.
 
 \subsection{Threshold Revocation}
 
@@ -472,24 +518,24 @@ revealing their content.
 	itself can be replayed by anyone who gets access to it.  This means
 	that, for example, after a credential was presented to an evil verifier or leaked to an attacker, the attacker can present the credential to any other verifier.
 	To prevent this type of unauthorized presentation, you can add 3 more fields containing information about the session, their signature and the associated public key.//
-	
+
 	\textbf{Issuer emit}: $\{H,r,s,m\}$
-	
+
 	\textbf{Holder} can chose a secret key $tSk$ each time and \textbf{present}:
 	$$\{H,r,s',m,t,tSg,tPk\}$$
 	Where $s'=s+sign(tSk,H:r)$.\\
 	$t$ can contain expiration date-time and the intended verifier identifier.\\
 	$tSg=sign(tSk,H:r:s':m:t)$\\
 	We might exclude $m$ from presentation to perform a proof of possession on credentials.\\
-	
-	
+
+
 	\textbf{Verifier checks}:
 	\begin{itemize}
 		\item t, time and session information
 		\item t signature
 		\item validity of $H,r,s,m$ as explained in Verification and revocation
-	\end{itemize}	
-	
+	\end{itemize}
+
 	\textbf{Security considerations}. The schema is secure because a evil verifier cannot reconstruct the holder information $\{H,r,s\}$ necessary for reply attack. Furthermore the 3 attributes of presented credentials $t,tSg,tpk$ cannot be modified or removed because $tPk$ is necessary for $s'$ signature verification.
 }
 
