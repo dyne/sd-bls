@@ -61,26 +61,36 @@ function holder_prove(signed_claims, disclosures)
   for m,v in pairs(signed_claims) do
     local claim = strtok(m, '=')
     if array_contains(disclosures, claim[1]) then
-      -- I.warn(v)
-      table.insert(res, {
-                     m = m,
-                     H = v.H,
-                     s = v.s,
-                     r = v.r
-      })
+      local obj = {
+        m = m,
+        H = v.H,
+        r = v.r
+      }
+      local tSK = BIG.random()
+      obj.s = v.s + sign(tSK, obj.H..obj.r)
+      obj.t = os.date()
+      obj.p = (G2*tSK):to_zcash()
+      obj.c = sign(tSK, obj.H .. obj.r .. obj.s:octet() .. obj.t)
+      table.insert(res, obj)
     end
   end
   return res
 end
 
 function verify_proof(APK, proof)
-  return verify(ECP2.from_zcash(proof.r) + APK, proof.H..proof.r, proof.s)
+  local res = true and
+    verify(ECP2.from_zcash(proof.p),
+           (proof.H .. proof.r .. proof.s:octet() .. proof.t),
+           proof.c)
+  return res and verify(ECP2.from_zcash(proof.r) +
+                        ECP2.from_zcash(proof.p) +
+                        APK, proof.H..proof.r, proof.s)
 end
 
 function revocation_contains(revocations, proof)
   local res   = false -- store here result for constant time operations
-  -- I.warn(revocations)
   local h = proof.H
+  -- assert(revocations[h])
   -- TODO: for some reason revocations[proof.H] doesn't works
   for k,v in pairs(revocations) do
     if k==proof.H and proof.r == (G2*v):to_zcash() then
@@ -118,9 +128,13 @@ DISCLOSE = { 'name', 'gender', 'above_18' }
 CREDENTIAL_PROOF = holder_prove(SIGNED_CLAIMS, DISCLOSE)
 
 for _,proof in pairs(CREDENTIAL_PROOF) do
+  assert(verify_proof(A.pk, proof) )
+end
+
+for _,proof in pairs(CREDENTIAL_PROOF) do
   local H = sha256(proof.m..proof.r)
   assert(H == proof.H, "Invalid proof hash")
-  assert( verify_proof(A.pk, proof) )
+  assert(verify_proof(A.pk, proof) )
   if proof.m == 'gender=male' then
     assert(revocation_contains(REVOKED, proof), "Not revoked: "..proof.m)
   else
@@ -139,6 +153,24 @@ for _,proof in pairs(CREDENTIAL_PROOF) do
   end
 end
 
+warn('random proof.p')
+for _,proof in pairs(CREDENTIAL_PROOF) do
+  proof.p = ECP2.random():to_zcash() -- FUZZ
+  assert(not verify_proof(A.pk, proof) )
+end
+
+warn('random proof.t')
+for _,proof in pairs(CREDENTIAL_PROOF) do
+  proof.t = OCTET.random(32)
+  assert(not verify_proof(A.pk, proof) )
+end
+
+warn('random proof.c')
+for _,proof in pairs(CREDENTIAL_PROOF) do
+  proof.c = sign(BIG.random(), OCTET.random(32))
+  assert(not verify_proof(A.pk, proof) )
+end
+
 warn('random proof.r')
 for _,proof in pairs(CREDENTIAL_PROOF) do
   proof.r = ECP2.random():to_zcash() -- FUZZ
@@ -148,6 +180,6 @@ end
 
 warn('random A.pk')
 for _,proof in pairs(CREDENTIAL_PROOF) do
-  assert(not verify_proof(A.pk, proof) )
+  assert(not verify_proof(ECP2.random(), proof) )
   assert(not revocation_contains(REVOKED, proof), "Revoked: "..proof.m)
 end
