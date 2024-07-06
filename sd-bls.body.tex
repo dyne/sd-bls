@@ -347,8 +347,12 @@ later to issue revocations.
 \subsection{Presentation} \label{presentation}
 
 An holder that needs to present a credential can choose the set of claims that need to present, and selectively disclose the desired claims.\\
-This can be achieved by simply presenting the set $\{ H, r, \sigma \}$ for each attribute requested, and the complete set  $\{ H, r, \sigma, m \}$ for the ones that must be disclosed.\\
-On the other hand this method clearly suffer vulnerability against replay attacks: if a malicious third party intercept a presentation, it can use it to impersonate the holder in another session.
+{\color{blue}--}This can be achieved by simply presenting the set $\{ H, r, \sigma \}$ for each attribute requested, and the complete set  $\{ H, r, \sigma, m \}$ for the ones that must be disclosed.\\
+%mi piaceva usare la parola "proof of possession"
+{\color{blue}This can be achieved by simply presenting $\{ H, r, \sigma, m \}$ for each m that must be disclosed and providing $\{ H, r, \sigma \}$ for the one we only need to provide a proof of possession.\\}
+{\color{blue}--}On the other hand this method clearly suffer vulnerability against replay attacks: if a malicious third party intercept a presentation, it can use it to impersonate the holder in another session.
+%"third party intercept a presentation". Eviterei "intercept"; dovrebbe essere al difuori del nostro threat model l'intercettazione. Noi teoricamente ipotiziamo sicuro il livello di trasporto. È il verifier che puo essere malevolo o potrebbe fare leakage per errore o perché attaccato
+{\color{blue}On the other hand this method clearly suffer vulnerability against replay attacks: whomever gets access to credentials can resubmit them to impersonate the holder in another session, regardless of whether they are an attacker or a malicious verifier}
 To prevent this type of unauthorized presentation, you can add more fields containing information about the session, their signature and the associated public key.\\
 We will refer to this as\\
 \textbf{Extended form of the credential} \\
@@ -357,14 +361,14 @@ Then we compute
 \begin{equation*}
     \begin{split}
         \sigma' &= \sigma + sign(sk_t, H : r) \\
-        \sigma_{t} &= sign(sk_t, H : r : s' : t : pk_t)
+        \sigma_{t} &= sign(sk_t, H : r : \sigma' : t : pk_t)
     \end{split}
 \end{equation*}
 In the end the presented credential is of the form
 \begin{equation*}
     \{H, r, \sigma', t, pk_t,  \sigma_t,\}
 \end{equation*}
-The schema is secure because a evil verifier cannot recostruct the holder information $\{H,r,s\}$ necessary for reply attack. Furthermore the 3 attributes of presented credentials $t,\sigma_t, pk_t$ cannot be modified or removed because $pk_t$ is necessary for $\sigma'$ signature verification, as will be discussed in the next section.
+The schema is secure because a evil verifier cannot recostruct the holder information $\{H,r,\sigma\}$ necessary for reply attack. Furthermore the 3 attributes of presented credentials $t,\sigma_t, pk_t$ cannot be modified or removed because $pk_t$ is necessary for $\sigma'$ signature verification, as will be discussed in the next section.
 
 \subsection{Verification}
 
