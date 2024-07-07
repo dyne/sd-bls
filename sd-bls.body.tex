@@ -68,11 +68,11 @@ digital identification documents such as ID, driving license, passport
 and social security numbers, which typically have longer or no
 expiration time. Future plans for the national standards we are
 observing include the adoption of ``Bitstring'' status lists
-\cite{status-lists} which may grant a degree of privacy. Our approach
-is that of designing a privacy-preserving revocation mechanism to
-remove the leak of holder's information and allow to delegate the
-governance of revocations to multiple revocation issuers which may be
-different from the credential issuer.
+\cite{status-lists} which may grant a degree of privacy. In SD-BLS we
+design a privacy-preserving revocation mechanism to remove the leak of
+holder's information and delegate the governance of revocations to a
+quorum of multiple revocation issuers which may be different from the
+credential issuer.
 
 %% - https://github.com/ministero-salute/it-dgc-verificaC19-android/issues/103
 %% - https://osf.io/preprints/lawarxiv/yc6xu
@@ -100,10 +100,10 @@ issuance.
 \centering
 \begin{tabular}{cccc}
 \hline
-       & \textbf{UP} & \textbf{UR} & \textbf{TR} \\ \hline
-SD-BLS & no          & yes         & yes         \\ \hline
-SD-JWT & no          & wip         & no          \\ \hline
-BBS+   & yes         & wip         & no          \\ \hline
+       & \textbf{UP} & \textbf{UR} & \textbf{TR} & \textbf{URG} \\ \hline
+SD-BLS & no          & yes         & yes         & yes \\ \hline
+SD-JWT & no          & wip         & no          & no  \\ \hline
+BBS+   & yes         & wip         & no          & yes \\ \hline
 \end{tabular}
 \caption{feature comparison}
 \label{tab:features}
@@ -111,16 +111,21 @@ BBS+   & yes         & wip         & no          \\ \hline
 
 We briefly round up on feature differences between the named selective
 disclosure cryptographic schemes, as shown in table
-\ref{tab:features}, mainly distinguishing between three fundamental
+\ref{tab:features}, mainly distinguishing between four fundamental
 features:
 \begin{itemize}
 \item UP: Unlinkable Presentation
 \item UR: Unlinkable Revocation
 \item TR: Threshold Revocation
+\item URG: Unregroupability
 \end{itemize}
 
-Where \emph{wip} is mentioned meaning work in progress on adoption of
+Where \emph{wip} is mentioned, it means work in progress on adoption of
 bitstring status lists for unlinkable revocations.
+
+The ``unregroupability'' feature refers to the fact that different
+presentations of different claims signed by the same issuer cannot be
+regrouped (linked to each other) as signed by the same issuer.
 
 \section{Overview}
 
@@ -319,11 +324,14 @@ Since $\sigma_i\in G_1 \forall i$, the algorithm has an homomorphic
 property. We exploit this property to add a revocation signature into
 the signed credential.
 
-The issuer create a credential as follow: given a claim $m$, it generate a new secret key $rev$ with public key $r$. Let $\mathcal{H}$ be a cryptographic hash function, we compute:
+The issuer create a credential as follow: given a claim $m$, it
+generate a new secret key $rev$ with public key $r$. Let $\mathcal{H}$
+be a cryptographic hash function, we compute:
 \begin{equation*}
     H = \mathcal{H}(m : r)
 \end{equation*}
-then the issuer proceeds to sign with both its private key, and the revocation key generated above:
+then the issuer proceeds to sign with both its private key, and the
+revocation key generated above:
 \begin{equation*}\label{rev_agg}
     \begin{split}
         r &= rev \cdot G_2 \\
@@ -421,18 +429,6 @@ When the presentation contains the value $m$ it should also be checked that
 \item verify $\sigma_t$ with public key $pk_t$
 \item verify $\sigma'$ with the public key $A.pk + r + pk_t$
 	\end{itemize}
-
- \textbf{security consideration ?}
- %{\color{red}
-%	[per noi e basta]
-%	Si vede subito come tPk, connn tutto il blocco $t,tSg,tpk$, non possa essere rimosso perché necessario alla verifica di $s'$
-%	Si vede subito come t non possano essere sostituito e rifirmato creando una nuova tSg perché il verifier non conosce $tSk$
-%	Si vede subito come dalla settupla non si puo generare un altra sestupla perché sarebbe necessario conoscere $s$, ma chi riceve le credenziali conosce vede solo $s'$. In più non è possibile ricreare $s$ conoscendo $H$ perché non si conosce $rSk$ né $aSk$ per performare le firme.
-
-%	La soluzione fatta come così sopra dovrebbe mantenere un vantaggio a sd-jwt che questo schema già ha e che forse non abbiamo detto: non avendo un header fisso con dentro una chiave pubblica per fare questa cosa allora la presentazione di m diversi non è linkabile alla stessa chiave pubblica o, se in jwt non usi il binding con la chiave, allo stesso gruppo di informazioni
-%	La mia proposta di soluzione al replay attack riesce a mantenere questa proprietà di sd-bls ed è quindi migliore dell'alternativa (uguale a come fa jwt):
-%	$$H(m:rPk:holderPk),rPk,s,m,t,tSg,holderPk$$
-%}
 
 This concludes the first verification phase. If the given presentation
 is valid, then the verifier should proceed to check the revocation
@@ -540,8 +536,11 @@ revealing their content.
 		\item validity of $H,r,s,m$ as explained in Verification and revocation
 	\end{itemize}
 
-	\textbf{Security considerations}. The schema is secure because a evil verifier cannot reconstruct the holder information $\{H,r,s\}$ necessary for reply attack. Furthermore the 3 attributes of presented credentials $t,tSg,tpk$ cannot be modified or removed because $tPk$ is necessary for $s'$ signature verification.
-}
+	\textbf{Security considerations}. The schema is secure because a
+  evil verifier cannot reconstruct the holder information $\{H,r,s\}$
+  necessary for reply attack. Furthermore the 3 attributes of
+  presented credentials $t,tSg,tpk$ cannot be modified or removed
+  because $tPk$ is necessary for $s'$ signature verification.  }
 
 
 \section{Benchmarks}
@@ -568,15 +567,26 @@ less computation heavy than verification, as shown in figure
     \label{fig:issueproveverify}
 \end{figure}
 
-Based on our benchmarks, the resulting data objects sizes, excluding the signed material which can be either of variable length or fixed length hashes, are:
+Based on our benchmarks, the resulting data objects sizes, excluding
+the signed material which can be either of variable length or fixed
+length hashes, are:
 \begin{itemize}
     \item Proof:  145 Bytes
     \item Revocation: 32 Bytes
 \end{itemize}
 
-The computational cost grows for the verification phase with the presence of a cryptographic revocations list. We assume that revocations are grouped by claim type or credential structure, for instance all revocations of a certain common claim (e.g.: "is above 18" or "is a Danish citizen") for any holder are published in the same list: this will not degrade the level of privacy and will group some revocations in smaller lists.
+The computational cost grows for the verification phase with the
+presence of a cryptographic revocations list. We assume that
+revocations are grouped by claim type or credential structure, for
+instance all revocations of a certain common claim (e.g.: "is above
+18" or "is a Danish citizen") for any holder are published in the same
+list: this will not degrade the level of privacy and will group some
+revocations in smaller lists.
 
-Lab measurements of the time taken by a single proof verification process to operate on a growing number of revocations demonstrate that there is a linear growth, as shown in figure \ref{fig:verifyrevocations}.
+Lab measurements of the time taken by a single proof verification
+process to operate on a growing number of revocations demonstrate that
+there is a linear growth, as shown in figure
+\ref{fig:verifyrevocations}.
 
 \begin{figure}
     \centering
@@ -586,7 +596,13 @@ Lab measurements of the time taken by a single proof verification process to ope
     \label{fig:verifyrevocations}
 \end{figure}
 
-The threshold operated for revocation issuers consists of a verifiable secret sharing implementation supporting a configurable total and quorum of peers. Our implementation shows very good performance on reconstruction, which is the most speed-sensitive operation in scenarios where responsive revocation process is required. The process of reconstruction can be easily scaled for asynchronous consensus on a micro-service swarm architecture and verified on blockchain.
+The threshold operated for revocation issuers consists of a verifiable
+secret sharing implementation supporting a configurable total and
+quorum of peers. Our implementation shows very good performance on
+reconstruction, which is the most speed-sensitive operation in
+scenarios where responsive revocation process is required. The process
+of reconstruction can be easily scaled for asynchronous consensus on a
+micro-service swarm architecture and verified on blockchain.
 
 \begin{figure}
     \centering
@@ -707,11 +723,10 @@ This work has been funded by the EU in the framework of the NGI
 TRUSTCHAIN project, grant No 101093274. We thank Puria Nafisi Azizi
 and Matteo Cristino for their infatiguable work on Zenroom, Luca Di
 Domenico for his help on the PVSS implementation, Giuseppe De Marco
-for sharing findings from his pioneering journey, Simone Onofri for
-his insights on threat models and Gabriele Bellini for his helpful
-security review. We extend our thanks the anonymous reviewers for
-their valuable advice and the De Cifris association for facilitating
-connections over a large network of unique professionals.
+for sharing findings from his pioneering journey and Simone Onofri for
+his insights on threat models. We extend our thanks the anonymous
+reviewers for their valuable advice and the De Cifris association for
+facilitating connections over a large network of unique professionals.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
