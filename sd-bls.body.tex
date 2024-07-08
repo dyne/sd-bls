@@ -324,8 +324,8 @@ property. We exploit this property to add a revocation signature into
 the signed credential.
 
 The issuer create a credential as follow: given a claim $m$, it
-generate a new secret key $rev$ with public key $r$. Let $\mathcal{H}$
-be a cryptographic hash function, we compute:
+generate a new secret revocation key $rev$ with public key $r$. Let
+$\mathcal{H}$ be a cryptographic hash function, we compute:
 \begin{equation*}
     H = \mathcal{H}(m : r)
 \end{equation*}
@@ -594,7 +594,7 @@ length hashes, are:
 The computational cost of verifications doesn't grows with the
 presence of a cryptographic revocations list. We assume revocations
 are published as hash maps usign the unique credential component $H$
-as key and the revocation key $r$ as value.
+as key and the secret revocation key $rev$ as value.
 
 Lab measurements of the time taken by a single proof verification
 process to operate on a growing number of revocations serves also to
