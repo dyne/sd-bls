@@ -661,17 +661,15 @@ against attacks looking for discrete logs on elliptic curves
 
 The $H$ component may be protected against brute-forcing attacks using
 hash collisions to forge a valid credential for a different message. A
-protection against this attack can be set in place in two different
-and non-exclusive ways:
-\begin{enumerate}
-\item adopt a key-derivation function like Argon2 \cite{argon2} on
-  hash creation, which will add computational costs to issuance and
-  verification.
-\item have the issuer concatenate a nonce to the credential message
-  like $m:nonce$ and then hash it as if it would be the message, then
-  make sure the nonce is known to the holder.
-\end{enumerate}
+protection against this attack can be the adoption of a key-derivation
+function like Argon2 \cite{argon2} on hash creation, which will add
+computational costs to issuance and verification.
 
+Anyone with knowledge of $H,r$ can try to guess $m$ by appending known
+strings, which becomes trivial especially in case of boolean
+credential strings (i.e. ``above18=true''). We recommend appending a
+nonce like $m:nonce$ before hashing the message, which will be
+disclosed by the holder according to context.
 
 \subsection{Future development}
 
