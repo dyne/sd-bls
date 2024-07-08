@@ -145,11 +145,10 @@ privacy issues posed by status and revocation lists.
 \paragraph{Selective disclosure}
 Similarly to the SD-JWT and mDOC formats, SD-BLS produces an array of
 claims: the elements of the array are individually signed by the
-issuer. In SD-BLS the signature(s) replace the HMAC. Using the
-homomorphic properties of this curve SD-BLS enables the holder to
-selectively disclose only certain issuer signed claims and produce a
-\textit{presentation} that minimizes private information given to
-verifiers.
+issuer. In SD-BLS the signature(s) replace the HMAC and still enable
+the holder to selectively disclose only certain signed credentials and
+produce a \textit{presentation} that minimizes private information
+given to verifiers.
 
 \paragraph{Anonymous cryptographic revocation}
 SD-BLS proposes a novel approach to credential revocation: the data
@@ -345,11 +344,8 @@ The set of all the signed claims will be:
 
 At the end of this phase the holder is sent the \textit{signed claims}
 to be stored in a private wallet, while the issuer stores a list of
-\textit{revocations}, associated with an identifier of the holder and
-the specific credential, into a private database that can be used
-later to issue revocations.
-
-
+\textit{revocations} as tuples formed by ${H,rev}$ into a private
+database that can be used later to issue revocations.
 
 \subsection{Presentation} \label{presentation}
 
@@ -529,20 +525,19 @@ party trustee, a revocation dealer, who should be:
 \end{itemize}
 
 Such a revocation dealer will be in contact with \textit{credential
- issuers} for the signature of credentials: it will create the $rev$
-revocation key while concealing it from them. The trustee then
-proceeds creating the $\sigma_{rev} = rev \cdot U$ revocation
-signature and the $r = rev \cdot G_2$ public key as detailed in the
-issuance phase \eqref{rev_agg}. Finally the revocation trustee will
-distribute $\sigma_{rev}$ and $r$ to issuers for further processing
-into the final signed credential.
+  issuers} for the signature of credentials: it will create the $rev$
+revocation key while concealing it from them. The dealer then proceeds
+creating the $\sigma_{rev} = rev \cdot U$ revocation signature and the
+$r = rev \cdot G_2$ public key, which will be communicated to the
+credential issuer to be aggregated into the signed credential (see
+section \eqref{rev_agg}).
 
-The revocation trustee (dealer) will then proceed asynchronously to
-split the revocation key into shares using a public verifiable secret
-sharing (PVSS \cite{pvss}) implementation and distribute these shares
-to all revocation issuers. In order to issue a revocation, a
-configurable quorum of peers among the revocation issuers will need to
-reconstruct the secret revocation key and publish it.
+The dealer will then proceed to split the secret revocation key into
+shares using a public verifiable secret sharing (PVSS \cite{pvss})
+implementation and distribute these shares to all revocation
+issuers. In order to issue a revocation, a configurable quorum of
+peers among the revocation issuers will need to reconstruct the secret
+revocation key and publish it.
 
 This process separates responsibilities between the credential issuer
 and the revocation issuers, delegating to the revocation issuers the
@@ -582,9 +577,7 @@ less computation heavy than verification, as shown in figure
     \label{fig:issueproveverify}
 \end{figure}
 
-Based on our benchmarks, the resulting data objects sizes, excluding
-the signed material which can be either of variable length or fixed
-length hashes, are:
+Based on our benchmarks, the resulting data objects sizes are:
 \begin{itemize}
     \item Signed claim: 177 Bytes
     \item Proof:  322 Bytes
@@ -592,9 +585,11 @@ length hashes, are:
 \end{itemize}
 
 The computational cost of verifications doesn't grows with the
-presence of a cryptographic revocations list. We assume revocations
-are published as hash maps usign the unique credential component $H$
-as key and the secret revocation key $rev$ as value.
+presence of a cryptographic revocations list, whose growth in terms of
+computational load mantains asyntotically constant complexity
+$\mathcal{O}(1)$. We assume revocations are published as hash maps
+using the unique credential component $H$ as key and the secret
+revocation key $rev$ as value.
 
 Lab measurements of the time taken by a single proof verification
 process to operate on a growing number of revocations serves also to
@@ -668,9 +663,10 @@ computational costs to issuance and verification.
 
 Anyone with knowledge of $H,r$ can try to guess $m$ by appending known
 strings, which becomes trivial especially in case of boolean
-credential strings (i.e. ``above18=true''). We recommend appending a
-nonce like $m:nonce$ before hashing the message, which will be
-disclosed by the holder according to context.
+credential strings (i.e. ``above18=true''). We recommend the
+credential issuer appends a nonce like $m:nonce$ before hashing and
+signing the message, which will be known by the holder and always
+disclosed when disclosing $m$.
 
 \subsection{Future development}
 
