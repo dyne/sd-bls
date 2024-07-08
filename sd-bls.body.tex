@@ -94,17 +94,22 @@ possibility for threshold issuance of revocation keys and by
 separating the responsibility of revocation issuance and credential
 issuance.
 
-\paragraph{Feature Comparison}
+
+\section{Overview}
+
+\subsection{Feature Comparison}
 
 \begin{table}[]
 \centering
-\begin{tabular}{cccc}
+\renewcommand{\arraystretch}{2}
+\begin{tabular}{ccccc}
 \hline
        & \textbf{UP} & \textbf{UR} & \textbf{TR} & \textbf{URG} \\ \hline
 SD-BLS & no          & yes         & yes         & yes \\ \hline
 SD-JWT & no          & wip         & no          & no  \\ \hline
 BBS+   & yes         & wip         & no          & yes \\ \hline
 \end{tabular}
+\vspace*{5mm}
 \caption{feature comparison}
 \label{tab:features}
 \end{table}
@@ -126,8 +131,6 @@ bitstring status lists for unlinkable revocations.
 The ``unregroupability'' feature refers to the fact that different
 presentations of different claims signed by the same issuer cannot be
 regrouped (linked to each other) as signed by the same issuer.
-
-\section{Overview}
 
 \subsection{Key contributions}
 The cryptographic scheme described in this paper, named
@@ -357,56 +360,80 @@ later to issue revocations.
 
 \subsection{Presentation} \label{presentation}
 
-A credential holder can choose any set of signed claims to present,
-and selectively disclose them into a presentation. Depending from the
-context of the presentation, the holder can present a proof of
-possession $\{ H, r, \sigma \}$ for each claim requested, or the
-complete set $\{ H, r, \sigma, m \}$ for claims whose content must be
-disclosed.
+Any presentation of a SD-BLS credential can simply omit the message
+$m$ to separate disclosure from verification as required by the
+specific context of a presentation and to satisfy privacy preserving
+design patterns for data minimization.
 
-These two forms of presentation are vulnerable to replay attacks: any
-verifier receiving such presentations can reuse them to impersonate
-the holder in any other session. To prevent replay attacks we add
-fields containing a signed timestamp and a public key of the session.
+\paragraph{Basic Proof}
+
+A credential holder can choose any set of signed claims to present,
+and selectively disclose them into what we name ``Basic Proof''
+presentation.
+
+The holder can present a basic proof of possession $\{ H, r, \sigma
+\}$ for each claim requested, or the complete set $\{ H, r, \sigma, m
+\}$ for claims whose content must be disclosed.
+
+However, Both forms of presentation of a basic proof are vulnerable to
+replay attacks: any verifier receiving such presentations can reuse
+them to impersonate the holder in any other session.
+
+\paragraph{One Time Proof}
+
+To prevent replay attacks we exploit once again the homomorphic
+property of BLS signatures to add a sessions signature into the
+credential signature, then we add separate fields containing a signed
+timestamp and the public key of the session signature.
+
+We name this presentation ``One Time Proof''.
 
 For each presentation the holder generates a key pair $(sk_t, pk_t)$
 and a string $t$ containing session information, i.e. an expiration
-date or a pointer to the intended recipient. Then we compute
+date or a pointer to the intended recipient. Then we compute:
 \begin{equation*}
     \begin{split}
         \sigma' &= \sigma + sign(sk_t, H : r) \\
         \sigma_{t} &= sign(sk_t, H : r : \sigma' : t : pk_t)
     \end{split}
 \end{equation*}
-And obtain a presentation composed as follows
+And obtain a presentation composed as follows:
 \begin{equation*}
     \{H, r, \sigma', t, pk_t,  \sigma_t,\}
 \end{equation*}
-This schema is secure because it is impossible to recostruct the holder information $\{H,r,\sigma\}$ necessary for a reply attack. Furthermore the three attributes $t,\sigma_t, pk_t$ cannot be modified or removed because $pk_t$ is necessary for the verification of signature $\sigma'$.
+
+This schema is secure because it is impossible to recostruct the
+holder information $\{H,r,\sigma\}$ necessary for a reply attack;
+furthermore the three attributes $t,\sigma_t, pk_t$ cannot be modified
+or removed because $pk_t$ is necessary for the verification of
+signature $\sigma'$.
 
 \subsection{Verification}
 
 Credential verification is made by checking the presented issuer's
-signature and revocation status of each claim. In order to verify the signature the credential issuer's public key must
-be added to the revocation public key.\\
-\textbf{Basic form}
-We consider the credential proof as a
-collection of tables of the following form:
+signature and revocation status of each claim. In order to verify the
+signature the credential issuer's public key must be added to the
+revocation public key.
+
+\paragraph{Basic proof}
+
+We consider the basic credential proof as a collection of tables of
+the following form:
 \begin{equation*}
     c = \{H, r, \sigma \}
 \end{equation*}
 where $\sigma$ and $r$ are respectively the signature of the string
-$H$ and the revocation public key, optionally the claim value $m$ can be included.\\
-We can check the validity of the
-presented claim computing the key
+$H$ and the revocation public key, optionally the claim value $m$ can
+be included.
+
+We can check the validity of the presented claim computing the key:
 \begin{equation*}
     pk = A.pk + r
 \end{equation*}
 and verify the bls signature $\sigma$.
 
-\subsubsection{Proof of correctness}
-% (questa è praticamente una proof dell'homomorphic property...)
-The signature $\sigma$ is given by
+As proof of correctness consider that the signature $\sigma$ is given
+by:
 \begin{equation*}
 \begin{split}
     \sigma &= sign(A.sk, H) + sign(rev, H) \\
@@ -424,12 +451,20 @@ Recalling the verification formula, it holds that:
  &= e(G_2, \sigma) \\
 \end{split}
 \end{equation*}
-where each equality holds for the bilinearity of the Miller loop.\\
-When the presentation contains the value $m$ it should also be checked that
+where each equality holds for the bilinearity of the Miller loop.
+
+When the presentation contains the value $m$ it should also be checked
+that:
 \begin{equation*}
     H = \mathcal{H}(m : r).
 \end{equation*}
-\textbf{Extended form} If the verifier receives the credential as $\{H, r, \sigma', t, pk_t,  \sigma_t,\}$ then it proceeds to
+
+
+\paragraph{One Time Proof}
+
+If the verifier receives the credential locked to the current session
+(with replay attack protection) as $\{H, r, \sigma', t, pk_t,
+\sigma_t,\}$ then it proceeds to
 \begin{itemize}
 \item verifiy the information in $t$ (e.g. timestamp)
 \item verify $\sigma_t$ with public key $pk_t$
@@ -467,7 +502,9 @@ If it happens that the signature verification is successful and that
 the revocation key does not match, one can conclude that the
 credential is not revoked.
 
-Note that in the case the verifier received a credential in extended form the check for the revocation status does not change.
+Note that, in the case the verifier received a credential in the ``One
+Time Proof'' form, the check for the revocation status does not
+change.
 
 \subsection{Threshold Revocation}
 
@@ -488,7 +525,7 @@ party trustee, a revocation dealer, who should be:
 \end{itemize}
 
 Such a revocation dealer will be in contact with \textit{credential
-  issuers} for the signature of credentials: it will create the $rev$
+ issuers} for the signature of credentials: it will create the $rev$
 revocation key while concealing it from them. The trustee then
 proceeds creating the $\sigma_{rev} = rev \cdot U$ revocation
 signature and the $r = rev \cdot G_2$ public key as detailed in the
@@ -516,38 +553,6 @@ received without revealing them. Such revocation proofs will also be
 useful when revocation issuers will reconstruct a revocation, since
 they can refer to them to prove their shares are authentic without
 revealing their content.
-
-\section{Prevent reply attack on presentation}
-{\color{blue}
-	With the scheme presented so far a Verifier only gets the proof that the
-	credential was issued by a particular Issuer and was not already revoked, but the credential
-	itself can be replayed by anyone who gets access to it.  This means
-	that, for example, after a credential was presented to an evil verifier or leaked to an attacker, the attacker can present the credential to any other verifier.
-	To prevent this type of unauthorized presentation, you can add 3 more fields containing information about the session, their signature and the associated public key.//
-
-	\textbf{Issuer emit}: $\{H,r,s,m\}$
-
-	\textbf{Holder} can chose a secret key $tSk$ each time and \textbf{present}:
-	$$\{H,r,s',m,t,tSg,tPk\}$$
-	Where $s'=s+sign(tSk,H:r)$.\\
-	$t$ can contain expiration date-time and the intended verifier identifier.\\
-	$tSg=sign(tSk,H:r:s':m:t)$\\
-	We might exclude $m$ from presentation to perform a proof of possession on credentials.\\
-
-
-	\textbf{Verifier checks}:
-	\begin{itemize}
-		\item t, time and session information
-		\item t signature
-		\item validity of $H,r,s,m$ as explained in Verification and revocation
-	\end{itemize}
-
-	\textbf{Security considerations}. The schema is secure because a
-  evil verifier cannot reconstruct the holder information $\{H,r,s\}$
-  necessary for reply attack. Furthermore the 3 attributes of
-  presented credentials $t,tSg,tpk$ cannot be modified or removed
-  because $tPk$ is necessary for $s'$ signature verification.  }
-
 
 \section{Benchmarks}
 
