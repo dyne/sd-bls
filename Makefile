@@ -1,3 +1,5 @@
+POC:
+	zenroom -l common.lua POC.lua
 
 arxiv: compose-arxiv
 	pdflatex sd-bls
@@ -30,20 +32,7 @@ clean:
 	rm -f *converted-to*
 	rm -f *.txt *.eps *.png
 
-
 figures: issueproveverify.eps verifyrevocations.eps pvss.eps
-
-# issueproveverify: ${STATS}
-# 	 sed 's/OUT/$@.txt/; s/TERM/pngcairo dashed ${TERMOPTS}/' \
-# 	 gnuplot.txt | gnuplot  > $@.png
-# 	 sed 's/OUT/$@.txt/; s/TERM/eps/' \
-# 	 gnuplot.txt | gnuplot  > $@.eps
-
-# verifyrevocations: ${STATS}
-# 	 sed 's/OUT/$@.txt/; s/TERM/pngcairo dashed ${TERMOPTS}/' \
-# 	 $@.gnuplot | gnuplot  > $@.png
-# 	 sed 's/OUT/$@.txt/; s/TERM/eps/' \
-# 	 $@.gnuplot | gnuplot  > $@.eps
 
 %.png: %.txt %.gnuplot
 	sed 's/TERM/pngcairo dashed rounded size 1024,768/' \
