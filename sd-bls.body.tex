@@ -483,11 +483,12 @@ list can be publicly distributed since revocation keys do not provide
 any information on the identity of holders.
 
 Given an element $c = \{H, r, \sigma \}$ of the credential
-presentation and the Issuer public key $A.pk$, if the claim id is
+presentation and the Issuer public key $A.pk$, if the claim $H$ is
 present in the revocation list, we can take the corresponding
-revocation private key $rev$.\\ We can verify the validity of the
-revocation by checking if the revocation public key presented by the
-holder match:
+revocation private key $rev$.
+
+We can verify the validity of the revocation by checking if the
+revocation public key presented by the holder match:
 \begin{equation*}
     r = G_2 \cdot rev
 \end{equation*}
@@ -632,9 +633,9 @@ The revocations database is privacy and corruption sensitive (by our
 previous definition of issuer corruption) and it should be securely
 stored by each Issuer. This is mitigated by the adoption of threshold
 revocation. When using threshold revocation there is still the need
-for a \textit{revocation trustee} who may be a single point of failure
-if allowed to publish revocation keys dishonestly collected during the
-process of credential issuance.
+for a \textit{revocation dealer} who has no access to private
+informations, but may be dishonest and publish revocation keys
+collected during the process of credential issuance.
 
 BLS signatures and the proof system obtained with credentials are
 considered secure by assuming the existence of random oracles
@@ -642,7 +643,11 @@ considered secure by assuming the existence of random oracles
 Problem (DDH) \cite{DDH-problem}, the external Diffie-Hellman Problem
 (XDH), and with the Lysyanskaya-Rivest-Sahai-Wol Problem (LRSW)
 \cite{lrsw-assumption}, which are connected to the Discrete
-Logarithm.
+Logarithm. The future growth of quantum-computing technologies may be
+able to overcome the Discrete Logarithmic assumptions by qualitatively
+different computational means and SD-BLS may then be vulnerable to
+quantum-computing attacks. However this is speculative reasoning on
+what we can expect from the future.
 
 The SD-BLS implementation we are presenting in this paper is
 demonstrated using the BLS12-381 curve \cite{bls381-12} also adopted
@@ -652,21 +657,6 @@ the BLS461 curve based on a 461 bit prime, hence upgrading our
 implementation to 128 bit security \cite{updating-key-pairings}
 against attacks looking for discrete logs on elliptic curves
 \cite{discrete-log-attack}.
-
-The future growth of quantum-computing technologies may be able to
-overcome the Discrete Logarithmic assumptions by qualitatively
-different computational means and SD-BLS may then be vulnerable to
-quantum-computing attacks. However this is speculative reasoning on
-what we can expect from the future.
-
-The SD-BLS implementation we present in this paper doesn't integrate
-any protection against replay-attacks, nor implements timestamps and
-expiration. We believe security features protecting from
-replay-attacks can be easily added and adapted from the context of
-deployment. I absence of session management providing such
-protections, any real-world use of SD-BLS should contemplate adding a
-signed timestamp to presentations and expiration checks on
-verifications.
 
 \subsection{Future development}
 
