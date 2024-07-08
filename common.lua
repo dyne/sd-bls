@@ -48,7 +48,7 @@ end
 
 -- POC high level API
 
-function issuer_sign(sk, claims)
+function issuer_sign_kv(sk, claims)
   local signed = { }
   local revs= { }
   for k,v in pairs(claims) do
@@ -60,6 +60,22 @@ function issuer_sign(sk, claims)
     o.s = sign(A.sk, o.H..o.r) + sign(rSK, o.H..o.r)
     signed[m] = o
     revs['HolderID/'..m] = rSK
+  end
+  return signed, revs
+end
+
+function issuer_sign(sk, claims)
+  local signed = { }
+  local revs= { }
+  for k,v in pairs(claims) do
+    local rSK = BIG.random()
+    local m = k..'='..v
+    local o = { }
+    o.r = (G2 * rSK):to_zcash()
+    o.H = sha256(m..o.r)
+    o.s = sign(A.sk, o.H..o.r) + sign(rSK, o.H..o.r)
+    signed[m] = o
+    revs[o.H] = rSK
   end
   return signed, revs
 end
@@ -131,16 +147,15 @@ function verify_proof(APK, proof)
                         APK, proof.H..proof.r, proof.s)
 end
 
-function revocation_contains(revocations, proof)
+function revocation_contains(rev, proof)
   local res   = false -- store here result for constant time operations
   local h = proof.H
   local r = proof.r
   -- assert(revocations[h])
   -- TODO: for some reason revocations[proof.H] doesn't works
-  for k,v in pairs(revocations) do
-    if k==h and r == (G2*v):to_zcash() then
-      res = true
-    end
+  local f = rev[h]
+  if f then
+      res = r == (G2*f):to_zcash()
   end
   return res
 end
@@ -155,46 +170,15 @@ function generate_fake_claims(num)
   return cls
 end
 
-
-function test_many_proofs(num, creds)
-  local start = os.clock()
-  proofs = { }
-  local c = 0
-  for k,v in ipairs(creds) do
-    local sig = v.s -- naked issuer's sig
-    local revG2 = v.r2
-    table.insert(proofs, {
-                   id = v.c,
-                   s = v.s,
-                   r = v.r2
-    })
-    c = c + 1
-    if c == num then break end
-  end
-  return proofs, os.clock() - start
-end
-
-function test_many_verifs(num, proofs)
-  local start = os.clock()
-  local c = 0
-  for k,v in ipairs(proofs) do
-    local sig = v.s
-    local pk = ECP2.from_zcash(v.r)
-    assert( verify(pk + A.pk, v.id, v.s) )
-    c = c + 1
-    if c == num then break end
-  end
-  return os.clock() - start
-end
-
 function test_many_revocs(num, revocs, proofs)
   local start = os.clock()
   local c = 0
   local found = 0
   for k,v in ipairs(proofs) do
     local pk = ECP2.from_zcash(v.r)
-    assert( verify(pk + A.pk, v.id, v.s) )
-    found = revocation_contains(revocs, v)
+    if verify(pk + A.pk, v.id, v.s) then
+      found = revocation_contains(revocs, v)
+    end
     c = c + 1
     if c == num then break end
   end

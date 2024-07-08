@@ -13,7 +13,7 @@ CLAIMS = {
   nationality = "italian"
 }
 
-SIGNED_CLAIMS, REVOCATIONS = issuer_sign(A.sk, CLAIMS)
+SIGNED_CLAIMS, REVOCATIONS = issuer_sign_kv(A.sk, CLAIMS)
 
 local TOREVOKE = {
   'HolderID/born_in=Napoli',

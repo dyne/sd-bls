@@ -54,7 +54,6 @@ for i=10,TOTAL,STEP do
   printerr(i.." ")
   local start = os.clock()
   PROOFS = holder_prove(CLAIMS, disclose)
-  -- PROOFS, T = test_many_proofs(i, CLAIMS)
   table.insert(PROOF_T, os.clock() - start)
 end
 collectgarbage'collect'
