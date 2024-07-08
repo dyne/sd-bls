@@ -235,7 +235,7 @@ We will adopt the following notations:
 
 \end{itemize}
 
-We also require the notion of a cryptographic pairing. \cite{} \\
+We also require the notion of a cryptographic pairing. \cite{weilpair} \\
 For the purpose of our protocol we will consider the \emph{Miller pairing} $e: E_T \times E\to
 \mathbb{G}_T$, where $\mathbb{G}_T\subset \mathbb{F}_{p^{12}}$ is
 the subgroup containing the $n$-th roots of unity, and $n$ is the
@@ -676,7 +676,7 @@ signatures must occur inside a trusted platform module (TPM). For
 mobile devices, this limits the secret keys and signatures to those
 offered, via proprietary APIs by the mobile OS, namely RSA (multiple
 flavours) and ECDSA on the secp256r1 curve. Currently the TPMs APIs
-supported by Android and iOS do not support BLS 12381 key generation
+supported by Android and iOS do not support BLS 12-381 key generation
 or signature.
 
 Client-side signatures in EUDI-ARF are mostly used in the
