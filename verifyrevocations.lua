@@ -49,7 +49,7 @@ for i=10,TOTAL,STEP do
   -- generation takes most time in this test
   local FAKEREVOCS = { }
   for n=1,i,1 do
-    FAKEREVOCS[claim_id] = BIG.modrand(ECP.order())
+    FAKEREVOCS[OCTET.random(32)] = BIG.modrand(ECP.order())
   end
   FAKEREVOCS[claim_id] = REVOC[claim_id]
 
