@@ -21,7 +21,8 @@ TOTAL = 160
 STEP = 10
 N_PROOFS = 1
 
-CLAIMS, REVOC, T = test_many_issuance(N_PROOFS)
+fakes = generate_fake_claims(N_PROOFS)
+CLAIMS, REVOC, T = test_many_issuance(fakes)
 PROOFS, T = test_many_proofs(N_PROOFS, CLAIMS)
 
 printerr''

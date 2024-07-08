@@ -47,12 +47,20 @@ function verify(pk, msg, sig)
    )
 end
 
-function test_many_issuance(num)
-  local start = os.clock()
-  claims = { }
-  revocs = { }
+function generate_fake_claims(num)
+  local cls = { }
   for i=1,num do
-    local claim = OCTET.random(32)
+    cls[OCTET.random(8)] = OCTET.random(8)
+  end
+  return cls
+end
+
+function test_many_issuance(fakes)
+  local start = os.clock()
+  local revocs = { }
+  local claims = { }
+  for k,v in pairs(fakes) do
+    local claim = k..v
     local rev = BIG.modrand(ECP.order())
     local sig = sign(A.sk, claim) + sign(rev, claim)
     table.insert(claims, {

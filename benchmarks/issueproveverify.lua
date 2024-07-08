@@ -25,9 +25,11 @@ STEP = 10
 TOTAL = TOTAL + STEP -- off by one fix
 printerr "issuance "
 local ISSUANCE_T = { }
+local fakes
 for i=10,TOTAL,STEP do
+  fakes = generate_fake_claims(i)
   printerr(i.." ")
-  CLAIMS, REVOCS, T = test_many_issuance(i)
+  CLAIMS, REVOCS, T = test_many_issuance(fakes)
   table.insert(ISSUANCE_T, T)
 end
 collectgarbage'collect'
