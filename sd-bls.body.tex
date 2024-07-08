@@ -287,23 +287,22 @@ completeness we also recall the main properties of the map:
 
 \subsection{Issuance} \label{issuance}
 
-As for other well known algorithms BLS signing will work following
-three main steps:
+As for other well known algorithms BLS signing works following three
+main steps:
 \begin{itemize}
 
-\item \textbf{Key Generation phase.} For an issuer who wants to sign a
+\item Key Generation phase.\\ For an issuer who wants to sign a
   credential $m$, a secret key $sk$ is a random number chosen
   uniformly in $\mathbb{F}_n$, where $n$ is the order of the groups
   $\mathbb{G}_1, \mathbb{G}_2, \mathbb{G}_T$. The corresponding public
   key $pk$ is the element $sk\cdot G_2\in E_T$;
 
-\item \textbf{Signing phase.} The credential $m$ is first hashed into
-  the point $U\in E$; the related signature is then given by $\sigma =
+\item Signing phase.\\ The credential $m$ is first hashed into the
+  point $U\in E$; the related signature is then given by $\sigma =
   sk\cdot U$;
 
-\item \textbf{Verification phase.} For an other user that wants to
-  verify the authenticity and the integrity of the message $m$, it
-  needs to
+\item Verification phase.\\ For an other user that wants to verify the
+  authenticity and the integrity of the message $m$, it needs to
 
   \begin{itemize}
 
