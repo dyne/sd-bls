@@ -135,40 +135,49 @@ by the same issuer.
 
 \subsection{Key contributions}
 The cryptographic scheme described in this paper, named
-\textit{SD-BLS} for brevity, implements some of the properties of the
-SD-JWT scheme (which can be easily encoded in mDOC format) and
-proposes a novel cryptographic approach to similar data
-structures. Furthermore SD-BLS proposes novel anonymous cryptographic
-revocation flow for verifiable credentials, that aims to solve the
-privacy issues posed by status and revocation lists.
+\textit{SD-BLS} for brevity, implements all the properties of the
+SD-JWT scheme and proposes a novel cryptographic approach to similar
+data structures. Furthermore SD-BLS proposes novel anonymous
+cryptographic revocation flow for verifiable credentials, that aims to
+solve governance issues posed by status and revocation lists.
 
 \paragraph{Selective disclosure}
 Similarly to the SD-JWT and mDOC formats, SD-BLS produces an array of
 claims: the elements of the array are individually signed by the
 issuer. In SD-BLS the signature(s) replace the HMAC and still enable
-the holder to selectively disclose only certain signed credentials and
-produce a \textit{presentation} that minimizes private information
-given to verifiers.
+the holder to selectively disclose only certain signed credentials,
+and produce a \textit{proof of possession} that minimizes private
+information given to verifiers.
 
 \paragraph{Anonymous cryptographic revocation}
 SD-BLS proposes a novel approach to credential revocation: the data
 published by the revocation issuer will produce cryptographic material
 that contains no information about the credential holders. The
 cryptographic revocation material allows anyone to verify if an SD-BLS
-proof produced by a credential holder has been revoked by one or
-multiple issuers. The unlinkability, and thus anonymity of the
-cryptographic revocation, allows the revocation issuer to share
-revocations in public and allows anyone to verify if credentials have
-been revoked.
+proof produced by a credential holder has been revoked. The
+unlinkability, and thus anonymity of the cryptographic revocation,
+allows the revocation issuer to share revocations in public and allows
+anyone to verify if credentials have been revoked.
+
+\paragraph{Multi-stakeholder governance of revocations}
+SD-BLS allows to introduce a new trusted party to the issuance phase:
+the revocation dealer. The dealer doesn't need to know the content of
+the credential or the identity of an holder: its role is that of
+producing the revocation signature and distributing its secret key to
+a configurable range of revocation issuers. Later on a configurable
+quorum of issuers may reconstruct the revocation secret key to revoke
+a credential. This way the decision on a revocation is not delegated
+to a single peer, but to a multi-stakeholder governance that protects
+the holder from issuer corruption.
 
 \paragraph{Extremely fast revocation checks}
 SD-BLS shows unique benchmark results on revocation checks: a verifier
-can operate very fast, no matter how big is the revocation lists. This
+can operate very fast, no matter how big is the revocation list. This
 is possible because revocations are looked up using an hash as key in
 a list, leveraging commonly optimized hash map lookups that are
 performed by any in-memory or on-disk database system. Our in-memory
-implentation doesn't slows down even when checking among 5000
-revocations of the same credential.
+implentation doesn't slows down even when checking several thousands
+revocations.
 
 \subsection{Applications}
 In this section we present some applications and use cases for digital
@@ -178,11 +187,11 @@ scheme.
 \paragraph{Digital identity}
 The focus of the EUDI-ARF specifications is identity documents: it
 defines mechanisms and data structures to issue a Personal
-Identification (PID) as well as digital driving licenses. Similarly,
-the US government is experimenting with W3C-VC and mDOC for
-cross-states interoperable driving licenses. SD-BLS data format is
-similar to SD-JWT and mDOC, offering selective disclosure and
-anonymous revocation.
+Identification (PID) as, for instance, with digital driving
+licenses. Similarly, the US government is experimenting with W3C-VC
+and mDOC for cross-states interoperable driving licenses. The SD-BLS
+data format is similar to SD-JWT and mDOC, offering selective
+disclosure and anonymous revocation.
 
 \paragraph{Academic credentials}
 Diploma and academic credentials are among the core offerings of EBSI
@@ -206,17 +215,17 @@ fidelity cards.
 SD-BLS can be used with blockchain-based smart-contracts to activate
 certain functions:
 \begin{itemize}
-    \item A verifiable presentation can be used by a smart-contract to
-      verify if one or more holder's claim match the requirement
-      needed to process a transaction.
+    \item A proof of possession can be published and be peer-verified
+      on-chain in its private form without disclosing the credential
+      contents.
+    \item A smart-contract may verify if one or more holder's
+      credentials match the requirement needed to process a
+      transaction.
     \item Issuers can publish their cryptographic revocation lists on
       chain, allowing smart-contracts to verify the status of a
       credential.
     \item The issuer's public keys can also be published on-chain,
       although this does not represent a novelty.
-    \item A presentation can be published and be peer-verified
-      on-chain in its private form without disclosing the contents of
-      the claim.
 \end{itemize}
 
 \section{Implementation}
@@ -351,8 +360,8 @@ database that can be used later to issue revocations.
 
 Any presentation of a SD-BLS credential can simply omit the message
 $m$ to separate disclosure from verification as required by the
-specific context of a presentation and to satisfy privacy preserving
-design patterns for data minimization.
+specific context of a proof of possession and to satisfy privacy
+preserving design patterns for data minimization.
 
 \paragraph{Basic Proof}
 
@@ -399,13 +408,14 @@ but this is not possible without the knowledge of the secret key $sk_t$.
 
 Furthermore the three attributes $t,\sigma_t, pk_t$ cannot be modified
 or removed because $pk_t$ is necessary for the verification of
-signature $\sigma'$.
-If an attacker tries to create a new valid presentation with freshly generated $sk_t', pk_t', t'$
-and $\sigma_t'$, then the signature $\sigma'' = \sigma' + sign(sk_t', H:r)$
-can be verified using the public key $pk_t + pk_t'$.
-However this public key does not verify the signature $\sigma_t'$, and $\sigma_t'$
-can not be updated using the homomorphic property since it is the signature over the old $\sigma'$.
-Thus any tampering of the presentation will lead to an invalid credential.
+signature $\sigma'$.  If an attacker tries to create a new valid
+presentation with freshly generated $sk_t', pk_t', t'$ and
+$\sigma_t'$, then the signature $\sigma'' = \sigma' + sign(sk_t',
+H:r)$ can be verified using the public key $pk_t + pk_t'$.  However
+this public key does not verify the signature $\sigma_t'$, and
+$\sigma_t'$ can not be updated using the homomorphic property since it
+is the signature over the old $\sigma'$.  Thus any tampering of the
+presentation will lead to an invalid credential.
 
 \subsection{Verification}
 
@@ -725,8 +735,8 @@ The SD-BLS math is fully compatible with ETH2.0 and can be computed
 inside an Ethereum VM. A verifier implemented in solidity can be a
 building block for more advanced Distributed Autonomous Organizations
 (DAO \cite{dao}) that want to authenticate peers using the selective
-disclosure of verifiable credentials instead of a key based proof of
-possession.
+disclosure of verifiable credentials instead of a single key based
+proof of possession.
 
 
 \section{Acknowledgements}
