@@ -162,6 +162,15 @@ cryptographic revocation, allows the revocation issuer to share
 revocations in public and allows anyone to verify if credentials have
 been revoked.
 
+\paragraph{Extremely fast revocation checks}
+SD-BLS shows unique benchmark results on revocation checks: a verifier
+can operate very fast, no matter how big is the revocation lists. This
+is possible because revocations are looked up using an hash as key in
+a list, leveraging commonly optimized hash map lookups that are
+performed by any in-memory or on-disk database system. Our in-memory
+implentation doesn't slows down even when checking among 5000
+revocations of the same credential.
+
 \subsection{Applications}
 In this section we present some applications and use cases for digital
 identity and credentials, that could benefit from using the SD-BLS
@@ -235,12 +244,13 @@ We will adopt the following notations:
 
 \end{itemize}
 
-We also require the notion of a cryptographic pairing. \cite{weilpair} \\
-For the purpose of our protocol we will consider the \emph{Miller pairing} $e: E_T \times E\to
-\mathbb{G}_T$, where $\mathbb{G}_T\subset \mathbb{F}_{p^{12}}$ is
-the subgroup containing the $n$-th roots of unity, and $n$ is the
-order of the groups $E$ and $E_T$.\\
-For completeness we also recall the main properties of the map:
+We also require the notion of a cryptographic pairing. \cite{weilpair}
+
+For the purpose of our protocol we will consider the \emph{Miller
+pairing} $e: E_T \times E\to \mathbb{G}_T$, where $\mathbb{G}_T\subset
+\mathbb{F}_{p^{12}}$ is the subgroup containing the $n$-th roots of
+unity, and $n$ is the order of the groups $E$ and $E_T$.\\ For
+completeness we also recall the main properties of the map:
 
 \begin{itemize}
 
@@ -576,21 +586,20 @@ Based on our benchmarks, the resulting data objects sizes, excluding
 the signed material which can be either of variable length or fixed
 length hashes, are:
 \begin{itemize}
-    \item Proof:  145 Bytes
-    \item Revocation: 32 Bytes
+    \item Signed claim: 177 Bytes
+    \item Proof:  322 Bytes
+    \item Revocation: 64 Bytes
 \end{itemize}
 
-The computational cost grows for the verification phase with the
-presence of a cryptographic revocations list. We assume that
-revocations are grouped by claim type or credential structure, for
-instance all revocations of a certain common claim (e.g.: "is above
-18" or "is a Danish citizen") for any holder are published in the same
-list: this will not degrade the level of privacy and will group some
-revocations in smaller lists.
+The computational cost of verifications doesn't grows with the
+presence of a cryptographic revocations list. We assume revocations
+are published as hash maps usign the unique credential component $H$
+as key and the revocation key $r$ as value.
 
 Lab measurements of the time taken by a single proof verification
-process to operate on a growing number of revocations demonstrate that
-there is a linear growth, as shown in figure
+process to operate on a growing number of revocations serves also to
+demonstrate the speed of Zenroom's in-memory resolution of its hash
+based key-value storage, as shown in figure
 \ref{fig:verifyrevocations}.
 
 \begin{figure}
