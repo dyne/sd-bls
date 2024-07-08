@@ -235,41 +235,36 @@ We will adopt the following notations:
 
 \end{itemize}
 
-We also require defining the notion of a cryptographic
-pairing. That is defined as a function $e:
-\mathbb{G}_2\times\mathbb{G}_1\to \mathbb{G}_T$, where
-$\mathbb{G}_1,\mathbb{G}_2$ and $\mathbb{G}_T$ are all groups of same
-order $n$, such that satisfies the following properties:
+We also require the notion of a cryptographic pairing. \cite{} \\
+For the purpose of our protocol we will consider the \emph{Miller pairing} $e: E_T \times E\to
+\mathbb{G}_T$, where $\mathbb{G}_T\subset \mathbb{F}_{p^{12}}$ is
+the subgroup containing the $n$-th roots of unity, and $n$ is the
+order of the groups $E$ and $E_T$.\\
+For completeness we also recall the main properties of the map:
 
 \begin{itemize}
 
-\item [i.] \emph{Bilinearity}, i.e. given $P_1,Q_1\in\mathbb{G}_1$
-  and $P_2,Q_2\in\mathbb{G}_2$, we have
+\item [i.] \emph{Bilinearity}, i.e. given $P_1,Q_1\in E_T$
+  and $P_2,Q_2\in E$, we have
   \begin{align*}
     e(P_2,P_1+Q_1) = e(P_2,P_1)\cdot e(P_2,Q_1)   \\
     e(P_2+Q_2,P_1) = e(P_2,P_1)\cdot e(Q_2,P_1)
   \end{align*}
 
 \item[ii.] \emph{Non-degeneracy}, meaning that for all
-  $g_1\in\mathbb{G}_1, g_2\in\mathbb{G}_2$, $e(g_2,g_1)\ne
+  $g_1\in E_T, g_2\in E$, $e(g_2,g_1)\ne
   1_{\mathbb{G}_T}$, the identity element of the group
   $\mathbb{G}_T$;
 
 \item[iii.] \emph{ Efficiency}, so that the map $e$ is easy to
   compute;
 
-\item[iv. ] $\mathbb{G}_1\ne \mathbb{G}_2$, and moreover, that
-  there exist no efficient homomorphism between $\mathbb{G}_1$ and
-  $\mathbb{G}_2$.
+\item[iv. ] $E_T \ne E$, and moreover, that
+  there exist no efficient homomorphism between $E_T$ and
+  $E$.
 
 \end{itemize}
 
-For the purpose of our protocol we will have $\mathbb{G}_1 = E$ and
-$\mathbb{G}_2 = E_T$, and $\mathbb{G}_T\subset \mathbb{F}_{p^{12}}$ is
-the subgroup containing the $n$-th roots of unity, where $n$ is the
-order of the groups $E$ and $E_T$. Instead $e: E_T \times E\to
-\mathbb{G}_T$ is the \emph{Miller pairing}, which in our work is
-encoded as the method \verb!miller(ECP2 P, ECP Q)!. \\
 
 
 \subsection{Issuance} \label{issuance}
@@ -285,8 +280,7 @@ three main steps:
   key $pk$ is the element $sk\cdot G_2\in E_T$;
 
 \item \textbf{Signing phase.} The credential $m$ is first hashed into
-  the point $U\in E$, which in our scheme is done by the method
-  \verb!hashtopoint!; the related signature is then given by $\sigma =
+  the point $U\in E$; the related signature is then given by $\sigma =
   sk\cdot U$;
 
 \item \textbf{Verification phase.} For an other user that wants to
@@ -307,18 +301,6 @@ three main steps:
   \end{itemize}
 If verification passes it means that $\sigma$ is a valid signature for
 $m$.
-\item \textbf{Proof of correctness} By using the definitions of the
-  elements involved and exploiting the property of the pairing $e$ we
-  have
-\[
-\begin{split}
-    e(pk,U) &= e(sk\cdot G_2, U) \\
-            &= e(G_2,U)^{sk}\\
-            &= e(G_2,sk\cdot U)\\
-            &= e(G_2,\sigma)
-\end{split}
-\]
-
 \end{itemize}
 
 BLS signatures also support aggregation: it is possible to aggregate a
@@ -403,11 +385,21 @@ And obtain a presentation composed as follows:
     \{H, r, \sigma', t, pk_t,  \sigma_t,\}
 \end{equation*}
 
-This schema is secure because it is impossible to recostruct the
+This schema is secure because it is impossible to reconstruct the
 holder information $\{H,r,\sigma\}$ necessary for a reply attack;
-furthermore the three attributes $t,\sigma_t, pk_t$ cannot be modified
+indeed, given $\sigma'$, an attacker that wants to retrieve $\sigma$
+should be able to reconstruct the signature $\sigma_t$,
+but this is not possible without the knowledge of the secret key $sk_t$.
+
+Furthermore the three attributes $t,\sigma_t, pk_t$ cannot be modified
 or removed because $pk_t$ is necessary for the verification of
 signature $\sigma'$.
+If an attacker tries to create a new valid presentation with freshly generated $sk_t', pk_t', t'$
+and $\sigma_t'$, then the signature $\sigma'' = \sigma' + sign(sk_t', H:r)$
+can be verified using the public key $pk_t + pk_t'$.
+However this public key does not verify the signature $\sigma_t'$, and $\sigma_t'$
+can not be updated using the homomorphic property since it is the signature over the old $\sigma'$.
+Thus any tampering of the presentation will lead to an invalid credential.
 
 \subsection{Verification}
 
