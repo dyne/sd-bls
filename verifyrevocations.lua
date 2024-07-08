@@ -17,7 +17,7 @@
 
 -- A = keygen()
 -- sha256 = HASH.new('sha256')
-TOTAL = 50000
+TOTAL = 60000
 STEP =  5000
 N_PROOFS = 1
 
@@ -71,9 +71,9 @@ end
 
 
 print("REVOCATIONS \t TIME")
-for i=1,(TOTAL/STEP),1 do
-  write(i*STEP)
-  write(' \t\t ')
-  write(REVOCS_T[i])
-  write('\n')
+for i=2,(TOTAL/STEP),1 do
+    write(i*STEP)
+    write(' \t\t ')
+    write(REVOCS_T[i])
+    write('\n')
 end

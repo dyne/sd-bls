@@ -353,7 +353,7 @@ The set of all the signed claims will be:
 
 At the end of this phase the holder is sent the \textit{signed claims}
 to be stored in a private wallet, while the issuer stores a list of
-\textit{revocations} as tuples formed by ${H,rev}$ into a private
+\textit{revocations} as tuples formed by $\{H,rev\}$ into a private
 database that can be used later to issue revocations.
 
 \subsection{Presentation} \label{presentation}
@@ -397,7 +397,7 @@ date or a pointer to the intended recipient. Then we compute:
 \end{equation*}
 And obtain a presentation composed as follows:
 \begin{equation*}
-    \{H, r, \sigma', t, pk_t,  \sigma_t,\}
+    \{H, r, \sigma', t, pk_t,  \sigma_t\}
 \end{equation*}
 
 This schema is secure because it is impossible to reconstruct the
@@ -473,16 +473,20 @@ that:
 
 If the verifier receives the credential locked to the current session
 (with replay attack protection) as $\{H, r, \sigma', t, pk_t,
-\sigma_t,\}$ then it proceeds to
+\sigma_t\}$ then it proceeds to
 \begin{itemize}
 \item verifiy the information in $t$ (e.g. timestamp)
 \item verify $\sigma_t$ with public key $pk_t$
 \item verify $\sigma'$ with the public key $A.pk + r + pk_t$
 	\end{itemize}
 
+In case the verifier is presented with a one time disclosure that
+includes $m$ then it needs also to check its hashed value $H =
+\mathcal{H}(m : r)$.
+
 This concludes the first verification phase. If the given presentation
 is valid, then the verifier should proceed to check the revocation
-status of the credential as explained below.
+status of the credential.
 
 \subsection{Revocation}
 
@@ -537,9 +541,9 @@ party trustee, a revocation dealer, who should be:
 Such a revocation dealer will be in contact with \textit{credential
   issuers} for the signature of credentials: it will create the $rev$
 revocation key while concealing it from them. The dealer then proceeds
-creating the $\sigma_{rev} = rev \cdot U$ revocation signature and the
-$r = rev \cdot G_2$ public key, which will be communicated to the
-credential issuer to be aggregated into the signed credential (see
+creating the $\sigma_{rev} = sign(rev, H : r)$ revocation signature
+and the $r = rev \cdot G_2$ public key, which will be communicated to
+the credential issuer to be aggregated into the signed credential (see
 section \eqref{rev_agg}).
 
 The dealer will then proceed to split the secret revocation key into
