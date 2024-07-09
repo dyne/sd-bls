@@ -30,7 +30,10 @@ compose-arxiv:
 clean:
 	rm -f *blg *bbl *dvi *pdf *toc *out *aux *log *lof
 	rm -f *converted-to*
-	rm -f *.txt *.eps *.png
+	rm -f *.txt *.png
+
+clean-eps:
+	rm -f *.eps
 
 figures: issueproveverify.eps verifyrevocations.eps pvss.eps
 
