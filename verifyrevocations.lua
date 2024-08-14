@@ -17,8 +17,8 @@
 
 -- A = keygen()
 -- sha256 = HASH.new('sha256')
-TOTAL = 60000
-STEP =  5000
+TOTAL = 1000
+STEP =  50
 N_PROOFS = 1
 
 -- Issuer's keyring hardcoded 0x0 seed
@@ -39,9 +39,10 @@ printerr''
 printerr "revocation "
 local REVOCS_T = { }
 -- I.warn({revocs = REVOC, proofs = PROOFS})
-local claim_id
+local claim_id, claim_rev
 for k,v in pairs(REVOC) do
   claim_id = k
+  claim_rev = v
 end
 
 for i=10,TOTAL,STEP do
@@ -49,16 +50,16 @@ for i=10,TOTAL,STEP do
   -- generation takes most time in this test
   local FAKEREVOCS = { }
   for n=1,i,1 do
-    FAKEREVOCS[OCTET.random(32)] = BIG.modrand(ECP.order())
+    table.insert(FAKEREVOCS, BIG.modrand(ECP.order()))
   end
-  FAKEREVOCS[claim_id] = REVOC[claim_id]
+  table.insert(FAKEREVOCS, claim_rev)
 
   printerr(i.." ")
   local start = os.clock()
   local found = 0
   for k,v in ipairs(PROOFS) do
     if verify_proof(A.pk, v) then
-      if revocation_contains(FAKEREVOCS, v) then
+      if anon_revocation_contains(FAKEREVOCS, v) then
         found = found + 1
       end
     end

@@ -147,6 +147,18 @@ function verify_proof(APK, proof)
                         APK, proof.H..proof.r, proof.s)
 end
 
+function anon_revocation_contains(rev, proof)
+  local res   = false -- store here result for constant time operations
+  local r = proof.r
+  -- assert(revocations[h])
+  -- TODO: for some reason revocations[proof.H] doesn't works
+  for _,v in ipairs(rev) do
+      res = r == (G2*v):to_zcash()
+  end
+  return res
+end
+
+
 function revocation_contains(rev, proof)
   local res   = false -- store here result for constant time operations
   local h = proof.H
