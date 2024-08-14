@@ -579,12 +579,24 @@ less computation heavy than verification, as shown in figure
 \begin{figure}
     \centering
     \includegraphics[width=1\linewidth]{issueproveverify.eps}
-
-    \caption{Speed comparison of issue and verify}
+    \caption{Speed comparison of issue and verify in SD-BLS}
     \label{fig:issueproveverify}
 \end{figure}
 
-Based on our benchmarks, the resulting data objects sizes are:
+As a handy reference, we provide a benchmark of the same operations
+performed using the BBS+ in Zenroom on the same machine: results show
+that SD-BLS is one order of magnitude slower than BBS+, whose
+verification runs aproximately at the same speed as other operations.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{bbs_issueproveverif.eps}
+    \caption{Speed comparison of issue and verify in BBS+}
+    \label{fig:bbs_issueproveverify}
+\end{figure}
+
+Based on our benchmarks, the resulting data objects sizes in SD-BLS
+are:
 \begin{itemize}
     \item Signed claim: 177 Bytes
     \item Proof:  322 Bytes
@@ -593,9 +605,9 @@ Based on our benchmarks, the resulting data objects sizes are:
 
 The computational cost of verifications grows linearly in presence of
 a cryptographic revocations list. We assume revocations are published
-as lists of secret revocation keys $rev$. Lab measurements of the time
-taken by a single proof verification process to operate on a growing
-number of revocations is shown in figure \ref{fig:verifyrevocations}.
+as lists of secret revocation keys. Lab measurements of the time taken
+by a single proof verification process to operate on a growing number
+of revocations is shown in figure \ref{fig:verifyrevocations}.
 
 \begin{figure}
     \centering
