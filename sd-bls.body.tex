@@ -170,14 +170,11 @@ a credential. This way the decision on a revocation is not delegated
 to a single peer, but to a multi-stakeholder governance that protects
 the holder from issuer corruption.
 
-\paragraph{Extremely fast revocation checks}
-SD-BLS shows unique benchmark results on revocation checks: a verifier
-can operate very fast, no matter how big is the revocation list. This
-is possible because revocations are looked up using an hash as key in
-a list, leveraging commonly optimized hash map lookups that are
-performed by any in-memory or on-disk database system. Our in-memory
-implentation doesn't slows down even when checking several thousands
-revocations.
+\paragraph{Fast revocation checks}
+SD-BLS shows good benchmark results on revocation checks: the main
+operation a verifier needs to do is an additional $\mathbb{G}_2$
+multiplication. The cost of this operation grows linearly with the
+number of published revocations.
 
 \subsection{Applications}
 In this section we present some applications and use cases for digital
@@ -495,12 +492,9 @@ list can be publicly distributed since revocation keys do not provide
 any information on the identity of holders.
 
 Given an element $c = \{H, r, \sigma \}$ of the credential
-presentation and the Issuer public key $A.pk$, if the claim $H$ is
-present in the revocation list, we can take the corresponding
-revocation private key $rev$.
-
-We can verify the validity of the revocation by checking if the
-revocation public key presented by the holder match:
+presentation, and a series of $rev$ elements found in any revocation
+list, we can verify a revocation by checking if the revocation public
+key presented by the holder matches:
 \begin{equation*}
     r = G_2 \cdot rev
 \end{equation*}
@@ -594,21 +588,14 @@ Based on our benchmarks, the resulting data objects sizes are:
 \begin{itemize}
     \item Signed claim: 177 Bytes
     \item Proof:  322 Bytes
-    \item Revocation: 64 Bytes
+    \item Revocation: 32 Bytes
 \end{itemize}
 
-The computational cost of verifications doesn't grows with the
-presence of a cryptographic revocations list, whose growth in terms of
-computational load mantains asyntotically constant complexity
-$\mathcal{O}(1)$. We assume revocations are published as hash maps
-using the unique credential component $H$ as key and the secret
-revocation key $rev$ as value.
-
-Lab measurements of the time taken by a single proof verification
-process to operate on a growing number of revocations serves also to
-demonstrate the speed of Zenroom's in-memory resolution of its hash
-based key-value storage, as shown in figure
-\ref{fig:verifyrevocations}.
+The computational cost of verifications grows linearly in presence of
+a cryptographic revocations list. We assume revocations are published
+as lists of secret revocation keys $rev$. Lab measurements of the time
+taken by a single proof verification process to operate on a growing
+number of revocations is shown in figure \ref{fig:verifyrevocations}.
 
 \begin{figure}
     \centering
