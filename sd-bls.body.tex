@@ -336,13 +336,13 @@ $\mathcal{H}$ be a cryptographic hash function, we compute:
 \end{equation*}
 then the issuer proceeds to sign with both its private key, and the
 revocation key generated above:
-\begin{equation*}\label{rev_agg}
+\begin{equation}\label{rev_agg}
     \begin{split}
         r &= rev \cdot G_2 \\
         \sigma_{rev} &= sign(rev, H : r)\\
         \sigma &= sign(sk, H : r) + \sigma_{rev}\\
    \end{split}
-\end{equation*}
+\end{equation}
 The set of all the signed claims will be:
 \begin{equation*}
    \mathcal{C} = \big\{ \{H, r, \sigma, m \} : m\in claims  \big\}
@@ -538,7 +538,7 @@ revocation key while concealing it from them. The dealer then proceeds
 creating the $\sigma_{rev} = sign(rev, H : r)$ revocation signature
 and the $r = rev \cdot G_2$ public key, which will be communicated to
 the credential issuer to be aggregated into the signed credential (see
-section \eqref{rev_agg}).
+equation \eqref{rev_agg}).
 
 The dealer will then proceed to split the secret revocation key into
 shares using a public verifiable secret sharing (PVSS \cite{pvss})
