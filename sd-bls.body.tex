@@ -662,9 +662,9 @@ The SD-BLS implementation we are presenting in this paper is
 demonstrated using the BLS12-381 curve \cite{bls381-12} also adopted
 by ETH2.0. Debating the choice of BLS12-381 is beyond the scope of
 this paper, but is worth mentioning that we can easily switch using
-the BLS461 curve based on a 461 bit prime, hence upgrading our
-implementation to 128 bit security \cite{updating-key-pairings}
-against attacks looking for discrete logs on elliptic curves
+the BLS461 curve based on a 461 bit prime, which offers a more
+conservative margin for 128 bit security than BLS12-381, in particular
+against discrete-log attacks on the pairing target group
 \cite{discrete-log-attack}.
 
 The $H$ component may be protected against brute-forcing attacks using
