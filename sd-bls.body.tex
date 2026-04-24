@@ -58,7 +58,7 @@ identities and credentials. There is no privacy-preserving revocation
 system designed, either in EUDI-ARF, or in W3C-VC and BBS+. In case
 the choice of strategy for revocation is left open to developers, the
 risk for major privacy breaches may occur, for example with the
-adoption of public status lists \cite{crlcomparison}. The hypotetical
+adoption of public status lists \cite{crlcomparison}. The hypothetical
 use of a certificate status lists (CRL) presents issues related
 primarily to privacy \cite{CRL}, because sensitive information about
 holders leaks from the list. This problem is partially mitigated by
@@ -298,7 +298,7 @@ main steps:
   point $U\in E$; the related signature is then given by $\sigma =
   sk\cdot U$;
 
-\item Verification phase.\\ For an other user that wants to verify the
+\item Verification phase.\\ For another user that wants to verify the
   authenticity and the integrity of the message $m$, it needs to
 
   \begin{itemize}
@@ -397,7 +397,7 @@ And obtain a presentation composed as follows:
 \end{equation*}
 
 This schema is secure because it is impossible to reconstruct the
-holder information $\{H,r,\sigma\}$ necessary for a reply attack;
+holder information $\{H,r,\sigma\}$ necessary for a replay attack;
 indeed, given $\sigma'$, an attacker that wants to retrieve $\sigma$
 should be able to reconstruct the signature $\sigma_t$,
 but this is not possible without the knowledge of the secret key $sk_t$.
@@ -471,7 +471,7 @@ If the verifier receives the credential locked to the current session
 (with replay attack protection) as $\{H, r, \sigma', t, pk_t,
 \sigma_t\}$ then it proceeds to
 \begin{itemize}
-\item verifiy the information in $t$ (e.g. timestamp)
+\item verify the information in $t$ (e.g. timestamp)
 \item verify $\sigma_t$ with public key $pk_t$
 \item verify $\sigma'$ with the public key $A.pk + r + pk_t$
 	\end{itemize}
@@ -586,7 +586,7 @@ less computation heavy than verification, as shown in figure
 As a handy reference, we provide a benchmark of the same operations
 performed using the BBS+ in Zenroom on the same machine: results show
 that SD-BLS is one order of magnitude slower than BBS+, whose
-verification runs aproximately at the same speed as other operations.
+verification runs approximately at the same speed as other operations.
 
 \begin{figure}
     \centering
@@ -643,7 +643,7 @@ previous definition of issuer corruption) and it should be securely
 stored by each Issuer. This is mitigated by the adoption of threshold
 revocation. When using threshold revocation there is still the need
 for a \textit{revocation dealer} who has no access to private
-informations, but may be dishonest and publish revocation keys
+information, but may be dishonest and publish revocation keys
 collected during the process of credential issuance.
 
 BLS signatures and the proof system obtained with credentials are
@@ -744,10 +744,10 @@ proof of possession.
 \section{Acknowledgements}
 This work has been funded by the EU in the framework of the NGI
 TRUSTCHAIN project, grant No 101093274. We thank Puria Nafisi Azizi
-and Matteo Cristino for their infatiguable work on Zenroom, Luca Di
+and Matteo Cristino for their indefatigable work on Zenroom, Luca Di
 Domenico for his help on the PVSS implementation, Giuseppe De Marco
 for sharing findings from his pioneering journey and Simone Onofri for
-his insights on threat models. We extend our thanks the anonymous
+his insights on threat models. We extend our thanks to the anonymous
 reviewers for their valuable advice and the De Cifris association for
 facilitating connections over a large network of unique professionals.
 
