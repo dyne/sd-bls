@@ -397,22 +397,19 @@ And obtain a presentation composed as follows:
     \{H, r, \sigma', t, pk_t,  \sigma_t\}
 \end{equation*}
 
-This schema is secure because it is impossible to reconstruct the
-holder information $\{H,r,\sigma\}$ necessary for a replay attack;
-indeed, given $\sigma'$, an attacker that wants to retrieve $\sigma$
-should be able to reconstruct the signature $\sigma_t$,
-but this is not possible without the knowledge of the secret key $sk_t$.
+This schema binds the credential presentation to the session data
+contained in $t$. The verifier checks $\sigma_t$ with public key $pk_t$
+over the tuple $(H : r : \sigma' : t : pk_t)$, and checks $\sigma'$
+with public key $A.pk + r + pk_t$. Therefore the values $t$, $pk_t$
+and $\sigma_t$ are cryptographically bound to the presented
+credential.
 
-Furthermore the three attributes $t,\sigma_t, pk_t$ cannot be modified
-or removed because $pk_t$ is necessary for the verification of
-signature $\sigma'$.  If an attacker tries to create a new valid
-presentation with freshly generated $sk_t', pk_t', t'$ and
-$\sigma_t'$, then the signature $\sigma'' = \sigma' + sign(sk_t',
-H:r)$ can be verified using the public key $pk_t + pk_t'$.  However
-this public key does not verify the signature $\sigma_t'$, and
-$\sigma_t'$ can not be updated using the homomorphic property since it
-is the signature over the old $\sigma'$.  Thus any tampering of the
-presentation will lead to an invalid credential.
+An attacker may copy a valid presentation only unchanged and only
+within the session policy accepted by the verifier for $t$. To create a
+fresh valid presentation for a different session, with a different
+$t'$ or $pk_t'$, the attacker would need to produce a new valid
+session signature without knowledge of the secret key $sk_t$. Thus any
+tampering of the presentation will lead to an invalid credential.
 
 \subsection{Verification}
 
